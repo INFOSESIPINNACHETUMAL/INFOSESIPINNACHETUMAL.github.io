@@ -1,0 +1,127 @@
+﻿
+div.toolt {
+  
+  color: #FFFFFF;
+  background: #000000;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 6px;
+}
+
+path.linea{
+    stroke:#333;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+    div.divGenMcss {
+        position: absolute;
+        width: 286px;
+        font: normal 10px Arial;
+        right:15px;
+    }
+}
+
+@media print{
+    #PiePagina{
+        display: none !important;
+        
+    }
+    #Encabezado{
+        display: none !important;
+    }
+    .container{
+    display: none !important;
+    }
+    #contenedorMapaPrint{
+    display: block !important;
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    }
+
+    #tblEstra_mapaTematicodivfastview_dalTable{
+        page-break-after: always
+        }
+
+    #estMapa_cont01mapa2{
+        page-break-after: always
+        }
+    .tablitaClonada > div {
+        width: 200px;
+        -webkit-print-color-adjust: exact;
+        }    
+
+    #tblTemTbl {
+        page-break-before:always;
+        width: 80%;
+        margin: auto;
+        
+       
+    }
+    #tblTemTbl > thead > tr> td, #tblTemTbl > tbody > tr> td {
+        border: 1px solid #ddd !important;
+        padding: 20px;
+        border-left: 1px solid #ddd !important;
+        padding: 5px !important;
+    }
+    #tblTemTbl tr:nth-child(even) {
+        background-color: #f2f2f2 !important;
+    } 
+
+    #tblTemTbl thead{
+        background-color: #D7D6D6 !important;
+        color: white;
+    }
+
+
+    .mt-txt-align-l {
+        text-align: left;
+        border: 1px solid #ddd !important;
+     
+    }
+    .mt-txt-align-r {
+        text-align: right;
+        border: 1px solid #ddd !important;
+      
+    }
+
+    .text-tbl-name{
+        font-size: 20px;
+        line-height: 1.6;
+    }
+    .nom-Tit-Medida{
+        font-size: 15px;
+        
+    }
+    .mos-hora-fech{
+        font-size: 12px;
+        line-height: 2.7;
+        
+    }
+    .td-Nombre-td{
+        font-size: 14px;
+      
+    }
+    .td-Valor-td{
+        font-size: 14px;
+    
+    }
+    .td-color-td{
+        border: 1px solid #ddd !important;
+    }
+    .nom-print-map{
+        font-size: 20px;
+    }
+
+    .cprint {
+        text-align: center !important;
+        width: 100% !important;
+    }
+  
+}
+    #contenedorMapaPrint{
+    display: none;
+
+    }

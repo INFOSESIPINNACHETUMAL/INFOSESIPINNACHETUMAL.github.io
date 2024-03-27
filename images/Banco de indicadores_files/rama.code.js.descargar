@@ -1,0 +1,297 @@
+﻿
+/// <summary>   Almacena objetos de las ramas de temas abiertos, permite rastrear cuando una rama esta completamente seleccionada y cual tema representa. </summary>
+var listaRamas = [];
+
+/// <summary>   Asigna el tema del objeto Rama </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <param name="tema"> Clave de tema. </param>
+/// <returns>   . </returns>
+RamaTema.prototype.SetTema = function (tema) {
+    this.Tema = tema;
+    this.PRTema = tema;
+};
+
+/// <summary>   Asigna el tema Padre del objeto Rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <param name="temaPadre">    Clave de tema padre. </param>
+/// <returns>   . </returns>
+RamaTema.prototype.SetTemaPadre = function (temaPadre) {
+    this.TemaPadre = temaPadre;
+};
+
+/// <summary>   Obtiene el  tema del objeto rama </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   Clave de tema. </returns>
+RamaTema.prototype.GetTema = function () {
+    return this.Tema;
+};
+
+/// <summary>   Agrega un indicador a la lista de la rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <param name="indicador">            Clave de indidador. </param>
+/// <param name="temaPadreEstaMarcado"> Indica si ya se selecciono el tema padre. </param>
+/// <returns>   . </returns>
+RamaTema.prototype.AddIndicador = function (indicador, temaPadreEstaMarcado) {
+    this.PrAgregaIndicadorLista(indicador, temaPadreEstaMarcado);
+};
+
+/// <summary>   Sube contador de indicadores en la rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.SubeContadorIndicadores = function () {
+    this.PrSubeContadorIndicadores();
+};
+
+/// <summary>   Baja contador de indicadores en la rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.BajaContadorIndicadores = function () {
+    this.PrBajaContadorIndicadores();
+};
+
+/// <summary>   Selecciona toda la rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.CheckDirecto = function () {
+    this.PrCheckDirecto();
+};
+
+/// <summary>   Desmarca toda la rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.UnCheckDirecto = function () {
+    this.PrUnCheckDirecto();
+};
+
+/// <summary>  Cambia valor checked de la rama  </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <param name="checkValue">   Valor de check (true, false). </param>
+/// <returns>   . </returns>
+RamaTema.prototype.SetCheck = function (checkValue) {
+    this.checked = checkValue;
+};
+
+/// <summary>   Agrega un tema a la lista de hijos de la rama. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <param name="tema">                 Clave de tema agregado. </param>
+/// <param name="temaPadreEstaMarcado"> Indica si el tema padre esta marcado. </param>
+/// <returns>   . </returns>
+RamaTema.prototype.AddTema = function (tema, temaPadreEstaMarcado) {
+    this.PrAgregaTemaLista(tema, temaPadreEstaMarcado);
+};
+
+/// <summary>   Sube contador de temas seleccionados. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.SubeContadorTemas = function () {
+    this.PrSubeContadorTemas();
+};
+
+/// <summary>   Baja contador de temas seleccionados. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.BajaContadorTemas = function () {
+    this.PrBajaContadorTemas();
+};
+
+/// <summary>   Revisa si la rama padre ya esta marcada. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+RamaTema.prototype.RevisaCheckedPadre = function () {
+    this.PrRevisaCheckedPadre();
+};
+
+/// <summary>   Clase que representa la seleccion multiple por tema. Genera un objeto con una lista de temas e indicadores
+///             relacionada a un tema padre, actualiza los contadores de seleccionados de padre a hijo y viceversa.
+///             Cambia la propiedad checked en true recursivamente cuando todos los hijos se seleccionan o en false
+///             cuando se desmarco alguno de los hijos. </summary>
+/// <remarks>   SERGIO NIETO MACIAS, 17/11/2016. </remarks>
+/// <returns>   . </returns>
+function RamaTema() {
+    /// <summary>   Clave de tema. </summary>
+    var Tema = "";
+    /// <summary>   Clave de tema padre. </summary>
+    this.TemaPadre = "";
+    /// <summary>   Lista de temas hijos. </summary>
+    var listaTemas = [];
+    /// <summary>   Lista de indicadores. </summary>
+    this.listaIndicadores = [];
+    /// <summary>   Contador de temas hijos seleccionados. </summary>
+    this.contTemas = 0;
+    /// <summary>   Contador de indicadores seleccionados. </summary>
+    this.contIndicadores = 0;
+    /// <summary>   Total de temas hijos </summary>
+    this.totalTemas = 0;
+    /// <summary>   Total de indicadores del tema. </summary>
+    this.totalIndicadores = 0;
+    /// <summary>   Indica cuando se debe seleccionar el tema. </summary>
+    this.checked = false;
+
+    /// <summary>   Clave de tema. </summary>
+    this.PRTema = "";
+
+    /// <summary>   Agrega indicador a la lista y aumenta total de indicadores </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <param name="indicador">    Clave de indicador. </param>
+    /// <param name="temaPadre">    Clave de tema padre. </param>
+    /// <returns>   . </returns>
+    this.PrAgregaIndicadorLista = function (indicador, temaPadre) {
+        this.listaIndicadores.push(indicador);
+        this.totalIndicadores++;
+        var actualizaListaIndicadores = false;
+        var checkPadre = document.getElementById("STemaChBox_" + temaPadre);
+        //SNM 09.09.2019 se valida de manera estricta y cambia por NULL
+        //if (checkPadre !== undefined) {
+        if (checkPadre !== undefined && checkPadre !== null) {
+            if (checkPadre.checked)
+                actualizaListaIndicadores = true;
+        }
+        if (actualizaListaIndicadores)
+            this.contIndicadores++;
+    };
+
+    /// <summary>   Desmarca tema padre si el tema actual se desmarca. </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrRevisaCheckedPadre = function () {
+        if (!this.checked) {
+            var checkPadre = document.getElementById("STemaChBox_" + this.TemaPadre);
+            if (checkPadre !== undefined && checkPadre !== null) {
+                if (checkPadre.checked)
+                    this.checked = true;
+            }
+        }
+    };
+
+    /// <summary>   Agrega tema a la lista y aumenta el total de temas hijos. </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <param name="tema">         Clave de tema. </param>
+    /// <param name="temaPadre">    Clave de tema padre. </param>
+    /// <returns>   . </returns>
+    this.PrAgregaTemaLista = function (tema, temaPadre) {
+        this.totalTemas++;
+        var actualizaContTemas = false;
+        var checkPadre = document.getElementById("STemaChBox_" + temaPadre);
+        //SNM 09.09.2019 se valida de manera estricta y cambia por NULL
+        //if (checkPadre !== undefined) {
+        if (checkPadre !== undefined && checkPadre !== null) {
+            if (checkPadre.checked)
+                actualizaContTemas = true;
+        }
+        if (actualizaContTemas)
+            this.contTemas++;
+    };
+
+    /// <summary>   Sube contador de temas hijos, si concide con el total de temas se marca toda la rama. </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrSubeContadorTemas = function () {
+        var _this = this;
+        if (this.contTemas < this.totalTemas)
+            this.contTemas++;
+        if (this.contTemas === this.totalTemas && this.contIndicadores === this.totalIndicadores) {
+            this.checked = true;
+            var checkboxTema = document.getElementById("STemaChBox_" + this.PRTema);
+            if (checkboxTema !== undefined && checkboxTema !== null)
+                checkboxTema.checked = true;
+            // actualiza padre
+            var objTemaPadre = listaRamas.filter(function (objTemaPadre) {
+                return objTemaPadre.Tema === _this.TemaPadre;
+            })[0];
+            if (objTemaPadre !== undefined && objTemaPadre !== null) {
+                objTemaPadre.SubeContadorTemas();
+            }
+        }
+    };
+
+    /// <summary>   Baja contador de temas hijos. Si la rama esta seleccionada entonces se desmarca. </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrBajaContadorTemas = function () {
+        var _this = this;
+        if (this.contTemas > 0)
+            this.contTemas--;
+        var oldChecked = this.checked;
+        this.checked = false;
+        var checkboxTema = document.getElementById("STemaChBox_" + this.PRTema);
+        if (checkboxTema !== undefined && checkboxTema !== null) {
+            if (checkboxTema.checked) {
+                checkboxTema.checked = false;
+            }
+        }
+        // actualiza Padre
+        if (oldChecked) {
+            var objTemaPadre = listaRamas.filter(function (objTemaPadre) {
+                return objTemaPadre.Tema === _this.TemaPadre;
+            })[0];
+            if (objTemaPadre !== undefined && objTemaPadre !== null) {
+                objTemaPadre.BajaContadorTemas();
+            }
+        }
+    };
+
+    /// <summary>   Sube contador indicadores.  </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrSubeContadorIndicadores = function () {
+        var _this = this;
+        this.contIndicadores++;
+        if (this.contTemas === this.totalTemas && this.contIndicadores === this.totalIndicadores) // cuando se implementen temas validar que se marcaron todos
+        {
+            this.checked = true;
+            var objTemaPadre = listaRamas.filter(function (objTemaPadre) {
+                return objTemaPadre.Tema === _this.TemaPadre;
+            })[0];
+            if (objTemaPadre !== undefined && objTemaPadre !== null) {
+                objTemaPadre.SubeContadorTemas();
+            }
+        }
+        //buscar check del tema
+        if (this.checked) {
+            var checkboxTema = document.getElementById("STemaChBox_" + this.PRTema);
+            if (checkboxTema !== undefined && checkboxTema !== null)
+                checkboxTema.checked = this.checked;
+        }
+        // implementar checar padre cuando se checan varios temas
+    };
+
+    /// <summary>   Baja contador de indicadores. </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrBajaContadorIndicadores = function () {
+        var _this = this;
+        this.contIndicadores--;
+        var oldChecked = this.checked;
+        this.checked = false;
+        var checkboxTema = document.getElementById("STemaChBox_" + this.PRTema);
+        if (checkboxTema !== undefined && checkboxTema !== null)
+            checkboxTema.checked = this.checked;
+        // desmarca padre recursivo
+        if (oldChecked) {
+            var objTemaPadre = listaRamas.filter(function (objTemaPadre) {
+                return objTemaPadre.Tema === _this.TemaPadre;
+            })[0];
+            if (objTemaPadre !== undefined && objTemaPadre !== null) {
+                objTemaPadre.BajaContadorTemas();
+            }
+        }
+    };
+
+    /// <summary>   Marca directamente la rama. </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 18/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrCheckDirecto = function () {
+        this.checked = true;
+        this.contIndicadores = this.totalIndicadores;
+        this.contTemas = this.totalTemas;
+    };
+
+    /// <summary>   Desmarca directamente la rama </summary>
+    /// <remarks>   SERGIO NIETO MACIAS, 22/11/2016. </remarks>
+    /// <returns>   . </returns>
+    this.PrUnCheckDirecto = function () {
+        this.checked = false;
+        this.contIndicadores = 0;
+        this.contTemas = 0;
+    };
+}

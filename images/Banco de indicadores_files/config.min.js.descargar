@@ -1,0 +1,157 @@
+var C_dominio_seguro = "",
+    C_dominio = "",
+    C_dominioBuscador = "",
+    C_token = "",
+    C_libreriasAlpha = "",
+    C_direccionServicio = "",
+    C_libreriasDomain = "",
+    C_libreriasFija = "",
+    C_librerias = "",
+    G_APISearch = "",
+    API_V = "",
+    C_direccionServicio_V = "";
+! function () {
+    var i = function (i) {
+        return new e(i)
+    },
+        e = function (i) {
+            if (i) {
+                var e = document.querySelectorAll(i),
+                    n = 0;
+                for (this.length = e.length,
+                    this.id = e[this.length - 1].id,
+                    this.container = i; n < this.length; n++)
+                    this[n] = e[n];
+                return this
+            }
+            return function () {
+                this.version = "1.2.1",
+                    this.fecha = "23.04.2021"
+            }()
+        };
+    i.fn = e.prototype = {
+        init: function () {
+            if (window.location.href.indexOf("https://") > -1) {
+                var_https = "https://";
+            } else {
+                var_https = "http://";
+            }
+            var_ingles = "",
+                window.location.href.indexOf("en.") > -1 && (var_ingles = "en."),
+                C_dominio_seguro = var_https + var_ingles + "www.inegi.org.mx/",
+                C_dominio = "",
+                C_libreriasAlpha = "/componentes/biinegi",
+                C_libreriasDomain = "/componentes/biinegi",
+                C_token = "96fbd1bf-21e6-28e3-6e64-2b15999d2c89",
+                G_APISearch = var_https + var_ingles + "www.inegi.org.mx/app/api/buscadorcore/v1/",
+                C_direccionServicio = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna_v1_1/",
+                API_V = "v1_1",
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna",
+                C_dominioBuscador = var_https + var_ingles + "www.inegi.org.mx/",
+                C_libreriasFija = "/componentes/biinegi"
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/indicadores") > -1) {
+                //if (window.location.href.indexOf("?tm=3") > -1 )
+                //{
+                API_V = "v1_3";
+                //}
+                //else{
+                //    API_V = "v1_1";
+                //}
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "inegi.org.mx/app/indicadores") > -1 ||
+                window.location.href.toLowerCase().indexOf(var_ingles + "inegi.org.mx/app/indicadores") > -1
+            ) {
+                //if (window.location.href.indexOf("?tm=3") > -1 )
+                //{
+                API_V = "v1_3";
+                //}
+                //else{
+                //    API_V = "v1_1";
+                //}
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/areasgeograficas") > -1 ||
+                window.location.href.toLowerCase().indexOf(var_ingles + "inegi.org.mx/app/areasgeograficas") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/estatal") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/bienestar") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/gapminder") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/cpv/2020/resultadosrapidos") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/querybuilder2") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/buscador/") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/app/tablero/default.html") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/temas/estructuras") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/temas/rechumanos") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/temas/recmateriales") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/temas/gobierno") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/temas/participacion") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+            if (window.location.href.toLowerCase().indexOf(var_https + var_ingles + "www.inegi.org.mx/temas/calidad") > -1) {
+                API_V = "v1_3";
+                C_direccionServicio_V = var_https + var_ingles + "www.inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+
+            if (window.location.href.toLowerCase().indexOf("https://inegi.org.mx/") > -1) {
+                C_direccionServicio_V = var_https + var_ingles + "inegi.org.mx/app/api/indicadores/interna";
+                C_direccionServicio = C_direccionServicio_V + '_' + API_V + "/";
+            }
+
+        }
+    },
+        window.configura || (window.configura = i)
+}();

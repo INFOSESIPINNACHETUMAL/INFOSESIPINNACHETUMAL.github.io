@@ -1,0 +1,80 @@
+.btn-toolbar {
+    margin-left: -5px;
+    padding: 10px 16px;
+}
+.cb-standar .checkbox, .cb-standar .radio {
+	margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 4px 10px 6px 25px;
+    border-bottom: 1px solid #f1f1f1;
+}
+.checkbox .cls-input-graf, .radio .cls-input-graf {
+    position: absolute !important;
+    margin-left: -20px !important;
+}
+.cb-standar .checkbox:hover, .cb-standar .radio:hover{
+	background:#f1f1f1;
+}
+.modalReloj {
+  text-align: center;
+  width:auto !important;
+} 
+.centerme {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.trunca {
+  width: 95%;
+  display:inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/*BUTTON DEFAULT COLOR GRID PARA BOTONES DEL COMPONENTE GRAFICADOR*/
+toolbar-graph nav .btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+    border-radius:0px;
+}
+toolbar-graph nav .btn-default:hover, toolbar-graph nav .btn-default:active, toolbar-graph nav .btn-default.active, .btn-default.active, .open>.dropdown-toggle.btn-default {
+    color: #333;
+    background-color: #e6e6e6 !important;
+    border-color: #adadad !important;
+}
+.graficador-componente h3 {
+    background:transparent !important;
+    color:#2279c0 !important;
+}
+.graficador-componente .tooltip {
+    white-space:normal;
+}
+toolbar-graph .btn-group {
+    margin-left:4px;    
+}
+toolbar-graph .btn.cls-graficador-tools {
+    /* width:49px;
+    height:37px;
+    padding:6px;
+    text-align:center !important;*/
+    border:1px solid #dcdcdc;
+}
+toolbar-graph .btn-group label {
+    width:32px;
+    height:32px;
+    padding:6px;
+}
+toolbar-graph .form-control {
+    border-radius:0px;
+}
+/**
+ * Para Pagina indicadores/gi/default.html 
+ */
+h3#giTitulo {
+    margin-top: 0px;
+    padding: 0px;
+    font-size: 26px;
+    color: #000;
+    background: #fff;
+}

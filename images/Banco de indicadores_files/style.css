@@ -1,0 +1,162 @@
+
+div.tooltipmap {
+    position: absolute;
+    min-height: 15px;
+    padding: 8px 12px;
+    font: 12px sans-serif;
+    color: #ffffff;
+    background: black;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+/* Legend Position Style */
+.legend {
+  font: 11px sans-serif;
+	left:55px;
+  padding: 5px;
+}
+
+.legendcb {
+  font: 11px sans-serif;
+	position:absolute;
+	left:40px;
+	top:444px;
+}
+#estMapa_cont13, #estMapa_cont12{
+	top:438px !important;
+}
+
+#estMapa_cont122,#estMapa_cont132{
+  top:800px !important;
+}
+
+.state {
+  stroke-width: 1;
+  stroke: #ffffff;
+}
+
+
+
+.sidepanel  {
+  width: 0;
+  height: 10px;
+  border-radius: 4px;
+  padding: 5px;
+  position: relative;
+  z-index: 1;
+  top: -42px;
+  left: 46px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  transition: width .2s;
+  transition-timing-function: linear;
+}
+
+.divpaletas{
+  float: left;
+  margin-right: 3em;
+  padding: 5px 5px 0 5px;
+}
+
+.divpaletas.selected{
+  background-color: #999;
+}
+.divpaletas:hover{
+  background-color: #ccc;
+}
+.labels{
+  font-family: arial;
+    font-size: 1.3em;
+}
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+.feature {
+  cursor: pointer;
+}
+
+.feature.active {
+  fill: #ccc;
+}
+
+
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.subdivision{
+  stroke: rgb(17, 17, 17);
+  stroke-width:0.2px ;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+
+
+@media only screen and (max-width: 620px) {
+  .contentP{
+    font-size:12px!important;
+  }
+  .contentP{
+    width: 73%!important;
+    left:41px!important;
+    top: -30px!important;
+  }
+  .btnGearMap,.inegi-imprimir{
+    font-size: 11pt !important;
+  }
+  .btn-xs{
+    width: 55px;
+  }
+}
+
+
+
+@media only screen and (max-width: 460px) {
+  .contentP{
+    width: 68%!important;
+  }
+
+  #btngImp{
+    top: 20px !important;;
+  }
+  #btnImpMap{
+    font-size: 7pt;
+  }
+  .paletas{
+    margin-top: 0px !important;
+  }
+}
+
+
+@media only screen and (max-width: 420px) {
+  .contentP{
+    width: 61%!important;
+  }
+}
+
+@media only screen and (max-width: 370px) {
+  .contentP{
+    height: 150px !important;
+    top: 23px!important;
+    left: 0px!important;
+    width: 109%!important;
+  }
+}
+@media only screen and (max-width: 360px) {
+  .contentP{
+    font-size: 11px!important;
+  }
+}
+
+
+
+
+

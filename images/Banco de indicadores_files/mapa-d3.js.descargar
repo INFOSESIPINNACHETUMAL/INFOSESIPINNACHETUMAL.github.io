@@ -1,0 +1,2643 @@
+let urlApiEnti_D3 = 'llamado/API.svc/CatalogoAreaGeografica/entMap/munMap/3/json/tokenMap';
+/// apiIndicadores
+let urlApiIndi_D3 = 'llamado/API.svc/ValoresDesgloseIndicador/indicaMp/entMap/ln/oport/json/tokenMap';
+let urlApiIndi_tm = 'llamado/API.svc/ValoresDesgloseIndicador/indicaMp/entMap/ln/oport/tm/json/tokenMap';
+//apimetadatos
+let urlApiMeta_D3 = 'llamado/API.svc/MetadatoIndicador/ln/indicaMp/0/periodoMp/periodoMp/oport/json/tokenMap';
+let urlApiMeta_tm = 'llamado/API.svc/MetadatoIndicador/ln/indicaMp/0/periodoMp/periodoMp/oport/tm/json/tokenMap';
+let coloresIniciales_D3 = new Array('#3288bd','#64a276', '#b36e02', '#a07fc2', '#ff5465', '#999421', '#599fae' ,'#db290d', '#fc8d59', '#525252', '#4f7d76', '#d419a5');
+let mapasTemObj_D3 = [];
+let inicializa2D_D3 = false;
+let dataEstraFija_D3 = new Array();
+let tituloIndicadores_D3 = false;
+
+
+let rangecolores = []; 
+let paramPeriodoVacio= false; //bandera para conocer si el parametro periodo viene vacio
+let paramUndefined=false; //bandera para saber cuando no mandaron parametros
+let servicio_ocupado=false;
+
+let paleta1= new Array('#d53e4f','#fc8d59','#c5890f','#518a22','#4da46f','#3288bd');
+let paleta2= new Array('#b30019','#ff4847','#8f5c4a','#959595','#737373','#525252');
+let paleta3= new Array('#989861','#9e843b','#c5890f','#db290d','#bd1f24','#97001c');
+let paleta4= new Array('#9f9741','#839d61','#46a491','#327eb8','#3146bd','#383199');
+
+
+const crearMapaTematicoD3 = (paramobj) => {
+    /* 
+    id=id contenedor
+    indica=indicador
+    dato_f=datos fijos
+    ageo=área geografica
+    muv=mostrar último valor 
+    mum= mostrar unidad de medida
+    mum_f= mostrar unidad de medida fija
+    pf=periodo final
+    mup=mostrar el periodo definido
+    mup_f=mostrar el periodo definido fijo
+    mn=mostrar notas
+    mn_f =fuentes  fijas
+    mf=nostrar fuente
+    mf_f =fuentes  fijas
+    mimpr= mostrar boton imprimir 
+    mxls=mostrar boton de descarga xls
+    estra=escala o estratificacion
+    mestra=mostrar radio buttons de estratos
+    estra_f=estratos fijos
+    paleta=paleta de colores o colores fijos
+    mpaleta=mostrar paletas de colores
+    mcompara=mostrar comparación de países
+    cobertura=est/mun/pais
+    etiqueta=fija/over
+    tm
+    */
+
+
+ 
+
+    let D3parametros={}; //parametros que enviare a crearmapad3
+    let parametrosOrig={}; //parametros que recibo en la función crearmapaTematicoD3
+    //validamos si se mando parámetros
+    if (paramobj !== undefined) {
+        paramUndefined=false;
+        if(paramobj.etiqueta!=undefined){
+            D3parametros.etiqueta=paramobj.etiqueta;
+        }
+        else
+            D3parametros.etiqueta='over';
+        //validamos si sera un mapa mundi
+        if(paramobj.cobertura!=undefined && paramobj.cobertura==='pais'){
+            try {
+ 
+                parametrosOrig=paramobj;
+                // revisar despues en ie no me dejo parametrosOrig={...paramobj};
+                $('#'+paramobj.id).empty();
+                //validacion para indefinidos de tipo boolean
+                parametrosOrig.muv=paramobj.muv;
+                parametrosOrig.mum=paramobj.mum;
+                parametrosOrig.mup=paramobj.mup;
+                parametrosOrig.mn=paramobj.mn;
+                parametrosOrig.mf=paramobj.mf;
+                parametrosOrig.mimpr=paramobj.mimpr;
+                parametrosOrig.mxls=paramobj.mxls;
+                parametrosOrig.mestra=paramobj.mestra;
+                parametrosOrig.mpaleta=paramobj.mpaleta;
+                parametrosOrig.mcompara=paramobj.mcompara;
+                D3parametros.mcompara=paramobj.mcompara;
+                parametrosOrig.tm=paramobj.tm;
+                verificaUndefined(parametrosOrig);
+        
+
+        
+                //validacion para undefined
+                    
+                if(paramobj.mf_f!=undefined)
+                    D3parametros.fuentesAdd=paramobj.mf_f;
+                else
+                    D3parametros.fuentesAdd="";
+
+                if(paramobj.mn_f!=undefined)
+                    D3parametros.notasAdd=paramobj.mn_f;
+                else
+                    D3parametros.notasAdd="";
+        
+                //validamos si nos mandaron estratos fijos, al no ser así se toma los que se envio o en caso la opción por default
+                if(paramobj.estra_f!=undefined){
+                    D3parametros.estratoslim=paramobj.estra_f;
+                    paramobj.estra='fijos';
+                    parametrosOrig.estra='fijos';
+                    parametrosOrig.mestra=false;
+                    D3parametros.estra="1";
+                }else{
+                    if(paramobj.estra!=undefined)
+                        D3parametros.estra=paramobj.estra;
+                    else{
+                        paramobj.estra="3";
+                        D3parametros.estra="3";
+                    }
+                }
+            
+
+
+                //validamos el parámetro paleta
+                if(paramobj.paleta!=undefined){
+                    D3parametros.colores=paramobj.paleta;
+                }
+                else{
+                    D3parametros.colores=['#24a55b'];
+                }
+                    
+        
+                if (paramobj.pf==undefined){
+                    paramPeriodoVacio=false;
+                    paramobj.pf=0;
+                }
+                else if(paramobj.pf!=0||paramobj.pf!='0'){
+                    paramobj.pf;
+                }
+                else{
+                    paramPeriodoVacio=false;
+                    paramobj.pf=0;
+                }
+
+                if(paramobj.mup_f!=undefined){
+                    parametrosOrig.mup_f =paramobj.mup_f;  
+                }
+                else{
+                    parametrosOrig.mup_f='';
+                }
+
+                if(paramobj.mum_f!=undefined){
+                    parametrosOrig.mum_f=paramobj.mum_f;   
+                }
+                else{
+                    parametrosOrig.mum_f='';
+                }
+
+                
+                if(paramobj.cobertura!=undefined){
+                    parametrosOrig.cobertura=paramobj.cobertura;  
+                    D3parametros.cobertura=paramobj.cobertura; 
+                }
+                else{
+                    parametrosOrig.cobertura='est';
+                    D3parametros.cobertura='est';
+                }
+                
+                
+                } catch (error) {
+                    console.log("mapamundi" +error);
+                }
+                let mapDemanda = document.getElementById(paramobj.id);
+                mapDemanda.innerHTML = '';
+                mapDemanda.innerHTML = '<div id="cargaMapa_' + paramobj.id + '" style="width:100%;height:100%;text-align: center;"><img alt="Cargando información..." title="Cargando información..." src="/img/cargando.gif" style="top: 50%;left:50%;position: absolute;"></div>';
+
+                mapDemanda.setAttribute("data-informacion", paramobj.dato_f);
+                mapDemanda.setAttribute('data-ageo', paramobj.ageo);
+                mapDemanda.setAttribute('data-tipoestratos', paramobj.estra);
+                mapDemanda.setAttribute('data-periodo', paramobj.pf);
+                mapDemanda.setAttribute('data-mestra', paramobj.mestra);
+                mapDemanda.setAttribute('data-mpaleta', paramobj.mpaleta);
+                mapDemanda.setAttribute('data-mcompara', paramobj.mcompara);
+                mapDemanda.setAttribute('data-mimpr', paramobj.mimpr);
+                mapDemanda.setAttribute('data-mxls', paramobj.mxls);
+            
+            
+    
+                $(mapDemanda).data('setUnidadM_D3', paramobj.mum == undefined ? false : paramobj.mum);
+                $(mapDemanda).data('setValorM_D3',paramobj.muv == undefined ? false : paramobj.muv);
+                $(mapDemanda).data('NotasM', paramobj.mn == undefined ? false : paramobj.mn);
+                $(mapDemanda).data('setFuentesM', paramobj.mf == undefined ? false : paramobj.mf);
+        //aqui empieza todo con la llamada a setMapasDocD3
+                $(mapDemanda).each(function () { 
+                    setMapasDocD3(this,parametrosOrig,D3parametros) 
+                });
+                document.getElementById('spanUnidad_' + paramobj.id).innerHTML=paramobj.mum_f;
+                document.getElementById('spanPer_' + paramobj.id).innerHTML =parametrosOrig.mup_f;
+                iniciaMapD3(D3parametros,'normal');
+                quitarloading(D3parametros.objeto);
+        }
+        else{
+            if (paramobj.id !== undefined && paramobj.indica !== undefined && paramobj.ageo !== undefined) {
+                    try {
+                            parametrosOrig=paramobj;
+                            // revisar despues en ie no me dejo parametrosOrig={...paramobj};
+                        $('#'+paramobj.id).empty();
+                        //validacion para indefinidos de tipo boolean
+                        parametrosOrig.muv=paramobj.muv;
+                        parametrosOrig.mum=paramobj.mum;
+                        parametrosOrig.mup=paramobj.mup;
+                        parametrosOrig.mn=paramobj.mn;
+                        parametrosOrig.mf=paramobj.mf;
+                        parametrosOrig.mimpr=paramobj.mimpr;
+                        parametrosOrig.mxls=paramobj.mxls;
+                        parametrosOrig.mestra=paramobj.mestra;
+                        parametrosOrig.mpaleta=paramobj.mpaleta;
+                        verificaUndefined(parametrosOrig);
+                
+
+                
+                        //validacion para undefined
+                        if(paramobj.mf_f!=undefined)
+                            D3parametros.fuentesAdd=paramobj.mf_f;
+                        else
+                            D3parametros.fuentesAdd="";
+
+                        if(paramobj.mn_f!=undefined)
+                            D3parametros.notasAdd=paramobj.mn_f;
+                        else
+                            D3parametros.notasAdd="";
+                
+                        //validamos si nos mandaron estratos fijos, al no ser así se toma los que se envio o en caso la opción por default
+                        if(paramobj.estra_f!=undefined){
+                            D3parametros.estratoslim=paramobj.estra_f;
+                            paramobj.estra='fijos';
+                            parametrosOrig.estra='fijos';
+                            parametrosOrig.mestra=false;
+                            D3parametros.estra="1";
+                        }else{
+                            if(paramobj.estra!=undefined)
+                                D3parametros.estra=paramobj.estra;
+                            else{
+                                paramobj.estra="3";
+                                D3parametros.estra="3";
+                            }
+                        }
+                        
+
+
+                        if(paramobj.dato_f!=undefined && paramobj.pf==undefined){
+                            paramobj.mn=false;
+                            paramobj.mf=false;
+                            paramobj.mum=false;
+                        }
+                    
+                        //validamos el parámetro paleta
+                        if(paramobj.paleta!=undefined){
+                            switch (paramobj.paleta) {
+                                case '1':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta1;
+                                    break;
+                                case '2':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta2;
+                                    break;
+                                case '3':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta3;
+                                    break;
+                                case '4':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta4;
+                                    break;
+                                case '5':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta5;
+                                    break;
+                                default:
+                                    D3parametros.paleta=paramobj.paleta;
+                                    parametrosOrig.colorfijo=true;
+                                    parametrosOrig.mpaleta=false;
+                                    paramobj.mpaleta=false;
+                                    break;
+                            }
+                        }
+                    else{
+                            D3parametros.paleta="";
+                        }
+                            
+                
+                        if (paramobj.pf==undefined){
+                            paramPeriodoVacio=false;
+                            paramobj.pf=0;
+                        }
+                        else if(paramobj.pf!=0||paramobj.pf!='0'){
+                            paramobj.pf;
+                        }
+                        else{
+                            paramPeriodoVacio=false;
+                            paramobj.pf=0;
+                        }
+
+                        if(paramobj.mup_f!=undefined){
+                            parametrosOrig.mup_f=paramobj.mup_f;   
+                        }
+                        else{
+                            parametrosOrig.mup_f='';
+                        }
+
+                        if(paramobj.mum_f!=undefined){
+                            parametrosOrig.mum_f=paramobj.mum_f;   
+                        }
+                        else{
+                            parametrosOrig.mum_f='';
+                        }
+
+                        
+                        if(paramobj.cobertura!=undefined){
+                            parametrosOrig.cobertura=paramobj.cobertura;  
+                            D3parametros.cobertura=paramobj.cobertura; 
+                        }
+                        else{
+                            parametrosOrig.cobertura='est';
+                            D3parametros.cobertura='est';
+                        }
+                        
+                        
+                    } catch (error) {
+                        console.log("crearMapaTematicoD3undefinned" +error);
+                    }
+                    inicializa2D_D3 = false;
+                    //aquí hay un error porque busco el array pero no hago nada con el
+                    mapasTemObj_D3 = $.grep(mapasTemObj_D3, function (value) {
+                        return value.id != paramobj.id;
+                    });
+                    let mapDemanda = document.getElementById(paramobj.id);
+                    mapDemanda.innerHTML = '';
+                    mapDemanda.innerHTML = '<div id="cargaMapa_' + paramobj.id + '" style="width:100%;height:100%;text-align: center;"><img alt="Cargando información..." title="Cargando información..." src="/img/cargando.gif" style="top: 50%;left:50%;position: absolute;"></div>';
+
+                    mapDemanda.setAttribute("data-informacion", paramobj.dato_f);
+                    mapDemanda.setAttribute('data-indicador', paramobj.indica);
+                    mapDemanda.setAttribute('data-ageo', paramobj.ageo);
+                    mapDemanda.setAttribute('data-tipoestratos', paramobj.estra);
+                    mapDemanda.setAttribute('data-periodo', paramobj.pf);
+                    mapDemanda.setAttribute('data-mestra', paramobj.mestra);
+                    mapDemanda.setAttribute('data-mpaleta', paramobj.mpaleta);
+                    mapDemanda.setAttribute('data-mimpr', paramobj.mimpr);
+                    mapDemanda.setAttribute('data-mxls', paramobj.mxls);
+                
+                    
+            
+                    $(mapDemanda).data('setUnidadM_D3', paramobj.mum == undefined ? false : paramobj.mum);
+                    $(mapDemanda).data('setValorM_D3',paramobj.muv == undefined ? false : paramobj.muv);
+                    $(mapDemanda).data('setPeriodoM_D3', paramobj.mup == undefined ? false : paramobj.mup);
+                    $(mapDemanda).data('NotasM', paramobj.mn == undefined ? false : paramobj.mn);
+                    $(mapDemanda).data('setFuentesM', paramobj.mf == undefined ? false : paramobj.mf);
+            //aqui empieza todo con la llamada a setMapasDocD3
+                    $(mapDemanda).each(function () { 
+                        setMapasDocD3(this,parametrosOrig,D3parametros) 
+                    });
+            }
+            else{
+                    //caso de Directorio pero con parámetros
+                    contm = "<div class='col-md-12 text-right'>";
+                    contm += "<div class='row'>";
+                    contm += "</div>";
+                    contm += "</div>";
+                    contm += "<div id='mapaTematico'  class='mapTem'  data-ageo='" +paramobj.ageo + "' data-tipoEstratos='" + paramobj.estra + "' >";
+                    document.getElementById(paramobj.id ).innerHTML = contm;
+                    document.getElementById("mapaTematico").setAttribute("data-informacion", paramobj.dato_f);
+                    paramobj.id='mapaTematico';
+                    let objTematico; 
+                    if ($('div.mapTem').length > 0) {
+                        $('div.mapTem').each(function () { objTematico=this;});
+                    }
+                
+                    try {
+                        parametrosOrig=paramobj;
+                        //validacion para indefinidos de tipo boolean
+                        parametrosOrig.muv=paramobj.muv;
+                        parametrosOrig.mum=paramobj.mum;
+                        parametrosOrig.mup=paramobj.mup;
+                        parametrosOrig.mn=paramobj.mn;
+                        parametrosOrig.mf=paramobj.mf;
+                        parametrosOrig.mimpr=paramobj.mimpr;
+                        parametrosOrig.mxls=paramobj.mxls;
+                        parametrosOrig.mestra=paramobj.mestra;
+                        parametrosOrig.mpaleta=paramobj.mpaleta;
+                        verificaUndefined(parametrosOrig);
+                
+
+                
+                        //validacion para undefined
+                        if(paramobj.mf_f!=undefined)
+                            D3parametros.fuentesAdd=paramobj.mf_f;
+                        else
+                            D3parametros.fuentesAdd="";
+                        
+                        if(paramobj.mn_f!=undefined)
+                            D3parametros.notasAdd=paramobj.mn_f;
+                        else
+                            D3parametros.notasAdd="";
+
+                        //validamos si nos mandaron estratos fijos, al no ser así se toma los que se envio o en caso la opción por default
+                        if(paramobj.estra_f!=undefined){
+                            D3parametros.estratoslim=paramobj.estra_f;
+                            paramobj.estra='fijos';
+                            parametrosOrig.estra='fijos';
+                            parametrosOrig.mestra=false;
+                            D3parametros.estra="1";
+                        }else{
+                            if(paramobj.estra!=undefined)
+                                D3parametros.estra=paramobj.estra;
+                            else{
+                                paramobj.estra="3";
+                                D3parametros.estra="3";
+                            }
+                        }
+                
+                        if(paramobj.paleta!=undefined){
+                            switch (paramobj.paleta) {
+                                case '1':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta1;
+                                    break;
+                                case '2':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta2;
+                                    break;
+                                case '3':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta3;
+                                    break;
+                                case '4':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta4;
+                                    break;
+                                case '5':
+                                    parametrosOrig.colorfijo=false;
+                                    D3parametros.paleta=paleta5;
+                                    break;
+                                default:
+                                    D3parametros.paleta=paramobj.paleta;
+                                    parametrosOrig.colorfijo=true;
+                                    parametrosOrig.mpaleta=false;
+                                    paramobj.mpaleta=false;
+                                    break;
+                            }
+                        
+                        }
+                    else{
+                            D3parametros.paleta="";
+                        }
+                        
+
+
+                        //validamos si nos mandan dato pero no periodo final, no se mostraria notas, fuentes y unidad de medida porque no se podria consultar el api de metadatos
+                        if(paramobj.dato_f!=undefined && paramobj.pf==undefined){
+                            paramobj.mn=false;
+                            paramobj.mf=false;
+                            paramobj.mum=false;
+                        }
+                
+                        if (paramobj.pf==undefined){
+                            paramPeriodoVacio=true;
+                            paramobj.pf=0;
+                        }
+                        else if(paramobj.pf!=0||paramobj.pf!='0'){
+                            paramobj.pf;
+                        }
+                        else{
+                            paramPeriodoVacio=true;
+                            paramobj.pf=0;
+                        }
+
+                        if(paramobj.mup_f!=undefined){
+                            parametrosOrig.mup_f=paramobj.mup_f;   
+                        }
+                        else{
+                            parametrosOrig.mup_f='';
+                        }
+
+                        if(paramobj.mum_f!=undefined){
+                            parametrosOrig.mum_f=paramobj.mum_f;   
+                        }
+                        else{
+                            parametrosOrig.mum_f='';
+                        }
+
+                        if(paramobj.cobertura!=undefined){
+                            parametrosOrig.cobertura=paramobj.cobertura;  
+                            D3parametros.cobertura=paramobj.cobertura; 
+                        }
+                        else{
+                            parametrosOrig.cobertura='est';
+                            D3parametros.cobertura='est';
+                        }
+                        
+                        
+                    } catch (error) {
+                        console.log("crearMapaTematicoD3undefinned" +error);
+                    }
+                    inicializa2D_D3 = false;
+        
+                    let mapDemanda = document.getElementById(objTematico.id);
+                    mapDemanda.innerHTML = '';
+                    mapDemanda.innerHTML = '<div id="cargaMapa_' + objTematico.id + '" style="width:100%;height:100%;text-align: center;"><img alt="Cargando información..." title="Cargando información..." src="/img/cargando.gif" style="top: 50%;left:50%;position: absolute;"></div>';
+
+                    mapDemanda.setAttribute("data-informacion", paramobj.dato_f);
+                    mapDemanda.setAttribute('data-tipoestratos', paramobj.estra);
+                    mapDemanda.setAttribute('data-periodo', paramobj.pf);
+                    mapDemanda.setAttribute('data-mimpr', paramobj.mimpr);
+                    mapDemanda.setAttribute('data-mxls', paramobj.mxls);
+                    if(paramobj.mestra!=undefined)
+                        document.getElementById("mapaTematico").setAttribute('data-mestra', paramobj.mestra);
+                    if(paramobj.mpaleta!=undefined)
+                        document.getElementById("mapaTematico").setAttribute('data-mpaleta', paramobj.mpaleta);
+
+                    
+            
+                    $(mapDemanda).data('setUnidadM_D3', paramobj.mum == undefined ? true : paramobj.mum);
+                    $(mapDemanda).data('setValorM_D3',paramobj.muv == undefined ? true : paramobj.muv);
+                    $(mapDemanda).data('setPeriodoM_D3', paramobj.mup == undefined ? true : paramobj.mup);
+                    $(mapDemanda).data('NotasM', paramobj.mn == undefined ? true : paramobj.mn);
+                    $(mapDemanda).data('setFuentesM', paramobj.mf == undefined ? true : paramobj.mf);
+                    if ($('div.mapTem').length > 0) {
+                        $('div.mapTem').each(function () { setMapasDocD3(this,parametrosOrig,D3parametros) });
+                    }
+            }
+        } 
+    } 
+    else {
+        //caso de Directorio sin parámetros
+        paramUndefined=true;
+        D3parametros.estra="3";
+        D3parametros.fuentesAdd="";
+        if ($('div.mapTem').length > 0) {
+            $('div.mapTem').each(function () { setMapasDocD3(this,parametrosOrig,D3parametros) });
+        }
+    }
+    let conCss = cr_elem_D3('link', '', { 'href': '/componentes/mapaTematico/css/mapaTematico.css', 'rel': 'stylesheet' }, ''); 
+
+    document.getElementsByTagName('head')[0].appendChild(conCss);
+   
+};
+
+const verificaUndefined =(parametros) => {
+    for (let property in parametros) {
+        parametros[property] = (parametros[property]!=undefined) ? parametros[property] : false;
+       // console.log(`${property}: ${parametros[property]}`);
+      }
+};
+
+const cambiollamaApi_D3 = () => {
+    let C_direccionServicio = '';
+    if (C_direccionServicio_V == '' || API_V == '') {
+        C_direccionServicio = "/app/api/indicadores/interna_v1_1";
+    }
+    else {
+        C_direccionServicio = C_direccionServicio_V + '_' + API_V;
+    }
+    return C_direccionServicio;
+};
+
+//constructores
+function mapTematico_D3(id, idAgeo) {
+    this.id = id;
+    this.titulo = '';
+    this.total = '';
+    this.periodo = '';
+    this.idEntidad = idAgeo.substring(0, 2);
+    this.nombre = '';
+    this.municipios = new Array();
+    this.indicador = '';
+    this.oportuno = 1;
+    this.anio = '';
+    this.tipoEstratifica = '1';
+    this.unidadMedida = '';
+    this.unidadMedidaM = true;
+    this.valorM = true;
+    this.periodoM = true;
+    this.cobertura='est';
+    //parámetros que ocupo del API, aún no están disponibles
+    this.fuentesM = false;
+    this.notasM = false;
+    this.fuentes = '';
+    this.notas = '';
+}
+
+function paises_D3( nombre, valor, color) {
+    this.nombre = nombre;
+    this.valor = valor;
+    this.coordenadas = new Array();
+    this.color = color;
+    this.mapa;
+}
+
+function municpio_D3(idMunicipio, nombre, valor, color) {
+    this.municipio = idMunicipio;
+    this.nombre = nombre;
+    this.valor = valor;
+    this.coordenadas = new Array();
+    this.estrato = '';
+    this.color = color;
+    this.mapa;
+}
+//elemento para método externo
+function munEnt_D3(idMunicipio, nombre, valor, color,periodoApi) {
+    this.id = idMunicipio;
+    this.nombre = nombre;
+    this.valor = valor;
+    this.estrato = '';
+    this.color = color;
+    this.periodo=periodoApi;
+}
+function arrayfuente (nombrefuente, urlproyecto) {
+    this.nombreFuente = nombrefuente;
+    this.urlProyecto = urlproyecto;
+}
+
+//Prototype mapas
+mapTematico_D3.prototype = {
+    constructor: mapTematico_D3,
+    crearMapaSvg: function (obj) {
+        let divMapaTem = document.getElementById(obj.id);
+        let divTitulo = cr_elem_D3('div', '', { 'class': 'col-md-12', 'style': 'font-size: 16px; text-align: right;' }, obj.titulo + '');
+        divTitulo.appendChild(cr_elem_D3('span', obj.total, { 'id': 'spanTotal_' + obj.id, 'style': 'font-size: 16px;color: #337ab7;font-weight: bold;' }, ''));
+        divTitulo.appendChild(cr_elem_D3('span', obj.total, { 'id': 'spanUnidad_' + obj.id, 'style': 'font-size: 16px;color:#337ab7;' }, ''));
+        let divSpPer = cr_elem_D3('div', '', { 'class': 'col-md-12' }, '');
+        divSpPer.appendChild(cr_elem_D3('span', obj.periodo, { 'id': 'spanPer_' + obj.id, 'style': 'font-size: 12px;float: right;' }, ''));
+        divMapaTem.appendChild(divTitulo);
+        divMapaTem.appendChild(divSpPer);
+        divSpMapE = cr_elem_D3('div', '', {'id': 'divobj_' +obj.id, 'class': 'col-md-12' }, '');
+        let elmObja = cr_elem_D3('a', '', { 'id': 'link', 'href': '#','style':'display:none' }, '');
+        divMapaTem.appendChild(divSpMapE);
+        divMapaTem.appendChild(elmObja);
+
+
+        let cont= document.getElementById(obj.id);
+        let mimp = cont.getAttribute('data-mimpr');
+        let mxls = cont.getAttribute('data-mxls');
+        if(mimp==='true')
+            cr_btnImp_D3(obj.id, divSpMapE);
+        if(mxls==='true')
+            cr_btnExcel_D3(obj.id, divSpMapE,obj.cobertura);
+
+          
+        let tipoVis = divMapaTem.getAttribute('data-tipovisual');
+
+        if (tipoVis == '2') {
+            elmObj.style.display = 'none';
+            divTitulo.style.display = 'none';
+            divSpPer.style.display = 'none';
+        }
+
+
+        if (tipoVis == '2') {
+            //divMapaTem.appendChild(cr_elem_D3('div', '', { 'id': 'pantwhi_' + obj.id, 'style': 'width: 100%;height: ' + divMapaTem.style.height + ';position: absolute;background-color: #fff;' }, ''));
+            divMapaTem.appendChild(cr_elem_D3('div', '', { 'id': 'pantwhi_' + obj.id, 'style': 'width: 100%;height: ' + divMapaTem.style.height + ';position: absolute;' }, ''));
+
+        }
+        //divMapaTem.appendChild(elmObj);
+       
+
+
+
+    },
+    setValoresD3: function (obj, elm,parametrosOrig,D3parametros) {
+        let  elmObjmapa; //guardo la informacion de cada mapa
+        let tkm = '9f161bde-19af-31b0-e4fe-aee373b1df89';
+        let tenti = '';
+
+        let v = $(obj).data('informacion');
+        elmObjmapa= v;
+        if (v !== 'undefined') {
+            D3parametros.informacion=elmObjmapa;
+            if(D3parametros.cobertura!='pais'){
+                   
+                let munMap = 'null';
+                if (elm.idEntidad == 0) {
+                    tenti = 'null';
+                }
+                else {
+                    tenti = elm.idEntidad;
+                }
+                let urlApi = urlApiEnti_D3.replace('entMap', tenti).replace('munMap', munMap).replace('tokenMap', tkm).replace('llamado', cambiollamaApi_D3());
+                //aquí llamar al Api
+                $.support.cors = true;
+                $.ajax({
+                    dataType: "jsonp",
+                    url: urlApi,
+                    data: "",
+                    cache: false,
+                    success: function (dataEnti) {
+                        elm.datosfijos=true;
+                        setMunicipiosDatosFijos(parametrosOrig,dataEnti, elm, v,D3parametros);
+                    },
+                    error: function (e) {
+                        console.log('setValoresD3, llamadaApi:'+urlApi+' '+e);
+                        iniciaMapD3(D3parametros,'simplect');////CREARA UN MAPA GRIS AL NO HABER INFORMACION pero con tooltips
+                        quitarloading(elm);
+                    }
+                });
+            }
+            else{
+                for (let i = 0; i < elmObjmapa.valores.length; i++) {
+
+                    elm.municipios.push(new paises_D3(elmObjmapa.valores[i].id, elmObjmapa.valores[i].val, ''));
+                }
+                D3parametros.idioma=encDomIng;
+ 
+            }
+            
+        }
+        else {
+
+            if(parametrosOrig.estra==='fijos'){
+                fetchingDataInfo(parametrosOrig,parametrosOrig.estra,fetchingDataMeta,elm,D3parametros);
+            }
+            else{
+                  //validacion para saber si se usara la estratificacion 3 que corresponden a las del componente, y si no es necesario mandar un 1
+                if(parametrosOrig.estra!='3'){
+
+                    fetchingDataInfo(parametrosOrig,parametrosOrig.estra,fetchingDataMeta,elm,D3parametros);
+                    
+                }
+                else{
+                    fetchingDataInfo(parametrosOrig,'1',fetchingDataMeta,elm,D3parametros);
+                    
+                }
+            }
+          
+        }
+            elm.colorfijo=parametrosOrig.colorfijo;
+    }
+};
+
+const  setMapasDocD3 = (obj,parametrosOrig,D3parametros) => {
+
+    if ($(obj).height() < 100) {
+        let divMapaTem = document.getElementById(obj.id);
+            $(obj).css('min-height', '500px');
+    }
+
+    let elm = new mapTematico_D3(obj.id, getAgeo_D3(obj));
+    elm.titulo = getTitulo_D3(obj);
+    elm.total = getTotal_D3(obj);
+    elm.indicador = getIndicador_D3(obj);
+    elm.tm=parametrosOrig.tm;
+    elm.periodo = getPeriodo_D3(obj);
+    elm.oportuno = getOportuno_D3(obj);
+    elm.unidadMedidaM = setUnidadM_D3(obj);
+    elm.valorM = setValorM_D3(obj);
+    elm.periodoM = setPeriodoM_D3(obj);
+    elm.cobertura=parametrosOrig.cobertura;
+    elm.fuentesM = setFuentesM_D3(obj);
+    elm.notasM = setNotasM_D3(obj);
+    elm.tipoEstratifica = getTipoEstrat_D3(obj);
+    elm.datosfijos=false;
+    elm.colorfijo=false;
+    elm.anio = getAnio_D3(obj);
+    elm.setValoresD3(obj, elm,parametrosOrig,D3parametros);
+    D3parametros.objeto=elm;
+    elm.crearMapaSvg(elm);
+    mapasTemObj_D3.push(elm);
+
+    if(D3parametros.cobertura==='pais'){
+        if(parametrosOrig.mcompara){
+            let divobj=document.getElementById('divobj_' +elm.id);  
+            let divContenedor=cr_btnGear(elm, divobj);
+            cr_divcompara(divContenedor,elm.id);
+        }
+    }
+};
+
+const setMunicipiosDatosFijos = (parametrosOrig,dataEnti, elm, valM,D3parametros) => {
+    try {
+        elm.nombre = dataEnti[0].Nombre_Entidad;
+        elm.titulo = dataEnti[0].Nombre_Indicador;
+    
+        if (elm.valorM) {
+            let dtot = document.getElementById('spanTotal_' + elm.id);
+            dtot.innerHTML = valM.valores[0].val;
+        }else{
+            document.getElementById('spanTotal_' + elm.id).style.display = 'none';
+        }
+    
+        if (elm.idEntidad != 0) {
+            for (let i = 0; i < dataEnti[0].Municipio.length; i++) {
+                let valMun = $.grep(valM.valores, function (ex) { return pad_D3(ex.id, 3) == dataEnti[0].Municipio[i].Municipio; });
+                let valo = '0';
+                if (valMun[0]) {
+                    valo = valMun[0].val
+                }
+                elm.municipios.push(new munEnt_D3(dataEnti[0].Municipio[i].Municipio, dataEnti[0].Municipio[i].Nombre, valo, ''));
+            }
+        }
+        else {
+            for (let i = 0; i < dataEnti.length; i++) {
+                let valMun = $.grep(valM.valores, function (ex) { return pad_D3(ex.id, 2) == dataEnti[i].Entidad; });
+                elm.municipios.push(new munEnt_D3(dataEnti[i].Entidad, dataEnti[i].Nombre, valMun[0].val, ''));
+            }
+        }
+            getEstratificarDatosFijos(parametrosOrig,elm,D3parametros);
+    } catch (error) {
+        console.log("setMunicipiosDatosFijos"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+   
+};
+const pad_D3 = (n, width, z) => {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+};
+
+const getEstratificarDatosFijos = (parametrosOrig,elm,D3parametros) => {
+    try {
+        let decimales = 0;
+        let vctKD = new Array();
+        for (let i = 1; i < elm.municipios.length; i++) {
+            if (elm.municipios[i].valor != '')
+                if (!isNaN((elm.municipios[i].valor).replace(/,/g, ''))) {
+                    decimales = getDecimales_D3(elm.municipios[i].valor, decimales);
+                    vctKD.push(parseFloat((elm.municipios[i].valor).replace(/,/g, '')));
+                }
+        }
+        webApiEstratificaDatosFijos(parametrosOrig,elm, vctKD, decimales,D3parametros);
+    } catch (error) {
+        console.log("getEstratificarDatosFijos"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+};
+
+const webApiEstratificaDatosFijos = (parametrosOrig,elm, vctKD, decimales,D3parametros) => {
+    let valorEstra = {
+        valores: vctKD,
+        tipoEstra: elm.tipoEstratifica
+    };
+    let siestra = $.grep(dataEstraFija_D3, function (ex) { return ex.id == elm.id; });
+
+    try {
+        if (siestra[0].tipo == 1) {
+
+            if (elm.municipios[0].valor < 0) {
+                //Estrato uno
+                siestra[0].estratos[0].limInferior = '?';
+                siestra[0].estratos[0].limSuperior = 'V{00}';
+                //Estrato dos
+                siestra[0].estratos[1].limInferior = 'V{00}';
+                siestra[0].estratos[1].limSuperior = '0';
+                //Estrato tres
+                siestra[0].estratos[2].limInferior = '0';
+                siestra[0].estratos[2].limSuperior = '?';
+            } else {
+                //Estrato uno
+                siestra[0].estratos[0].limInferior = 'V{00}';
+                siestra[0].estratos[0].limSuperior = '?';
+                //Estrato dos
+                siestra[0].estratos[1].limInferior = '0';
+                siestra[0].estratos[1].limSuperior = 'V{00}';
+                //Estrato tres
+                siestra[0].estratos[2].limInferior = '?';
+                siestra[0].estratos[2].limSuperior = '0';
+            }
+
+
+        }
+    }
+    catch (x) {
+        //console.log('No se ha definido el tipo de mapa');
+    }
+
+
+
+    if (siestra.length > 0) {
+        //coloresIniciales_D3 = ('#fff,' + siestra[0].colores).split(',');
+
+        for (let z = 0; z < siestra[0].estratos.length; z++) {
+            if (siestra[0].estratos[z].limInferior == '?') {
+                //siestra[0].estratos[z].limInferior = Math.min.apply(null, vctKD);
+                siestra[0].estratos[z].limInferior = (/[$]/i.test(siestra[0].estratos[z].limInferior.toString())) ? '$' + Math.min.apply(null, vctKD) : Math.min.apply(null, vctKD); 
+            }
+
+            if (siestra[0].estratos[z].limSuperior == '?') {
+                //siestra[0].estratos[z].limSuperior = Math.max.apply(null, vctKD);
+                siestra[0].estratos[z].limSuperior = (/[$]/i.test(siestra[0].estratos[z].limSuperior.toString())) ? '$' + Math.max.apply(null, vctKD) : Math.max.apply(null, vctKD); 
+            }
+
+        }
+
+        for (let x = 0; x < siestra[0].estratos.length; x++) {
+            siestra[0].estratos[x].limInferior = formatear_D3(siestra[0].estratos[x].limInferior.toString(), elm);
+            siestra[0].estratos[x].limSuperior = formatear_D3(siestra[0].estratos[x].limSuperior.toString(), elm);
+        }
+
+
+        webApiClasificaDatosFijos(parametrosOrig,siestra[0].estratos, elm, decimales, siestra[0].colores,D3parametros);
+    }
+    else {
+
+        if(parametrosOrig.estra!='fijos'){
+            $.ajax({
+                contentType: "application/json",
+                dataType: "json",
+                method: "POST",
+                url: "/app/api/mapatematico/mapaTem/obtenerEntidad",
+                data: JSON.stringify(valorEstra),
+                cache: false,
+                success: function (dataEstra) {
+                   console.log(dataEstra);
+                   if(elm.periodo!='')
+                        registraApiMeta(elm,parametrosOrig);
+                        webApiClasificaDatosFijos(parametrosOrig,dataEstra, elm, decimales,'',D3parametros);
+                        iniciaMapD3(D3parametros,'normal');//llama al camponente d3
+                        quitarloading(elm);
+                },
+                error: function (qXHR, textStatus, errorThrown) {
+                    // throw new Error(errorThrown + ' ' + this.url + ' ' + JSON.stringify(this.data));
+                    iniciaMapD3(D3parametros,'simplect');////CREARA UN MAPA GRIS AL NO HABER INFORMACION pero con tooltips
+                     quitarloading(elm);
+                     }
+            });
+        }
+        else{
+            registraApiMeta(elm,parametrosOrig);
+            webApiClasificaDatosFijos(parametrosOrig,D3parametros.estratoslim, elm, decimales,'',D3parametros);
+            iniciaMapD3(D3parametros,'normal');//llama al camponente d3
+            quitarloading(elm);
+        }
+        
+    }
+};
+
+const webApiClasificaDatosFijos = (parametrosOrig,dataEstra, elm, decimales, colores,D3parametros) => {
+    try {
+        let txt_periodof='';
+        if (elm.periodoM) {
+            if(elm.periodo!=''&& elm.periodo!='0'){
+                txt_periodof=elm.periodo ;
+            }
+            else{
+                document.getElementById('spanPer_' + elm.id).style.display = 'none';
+            }
+        }
+        else{
+            document.getElementById('spanPer_' + elm.id).style.display = 'none';
+        }
+    
+        if(parametrosOrig.mup_f!=''){
+            txt_periodof=txt_periodof+' '+parametrosOrig.mup_f;
+            document.getElementById('spanPer_' + elm.id).innerHTML =txt_periodof;
+            document.getElementById('spanPer_' + elm.id).style.display = 'block';
+        }
+        else{
+            document.getElementById('spanPer_' + elm.id).innerHTML =txt_periodof;
+        }
+    
+        generaColoresD3(dataEstra,D3parametros);
+        let coloresInicialesInt = coloresIniciales_D3;
+        //validación para colores fijos (se agregó el parámetro colores)
+        if (colores) {
+            coloresInicialesInt = ('#fff,' + colores).split(',');
+        }
+    
+    let coloInit;
+        for (let j = 1; j < elm.municipios.length; j++) {
+            for (let i = 0; i < dataEstra.length; i++) {
+                if(elm.tipoEstratifica=='fijos'){
+    
+                    if (condicionPersonalizada(dataEstra[i].limSuperior, dataEstra[i].limInferior, (elm.municipios[j].valor).replace(/,/g, ''),dataEstra[i].operadorS,dataEstra[i].operadorI)) {
+                        elm.municipios[j].estrato = dataEstra[i].nestrato;
+                        try {
+                            coloInit = coloresInicialesInt[dataEstra[i].nestrato];
+                        } catch (error) {
+                            coloInit='#fff';
+                        }
+                       
+                        if (dataEstra[i].nestrato == 'extremosar') {
+                            coloInit = coloresInicialesInt[(11)];
+                        }
+                        if (dataEstra[i].nestrato == 'extremosab') {
+                            coloInit = coloresInicialesInt[(10)];
+                        }
+                        if (dataEstra[i].nestrato == 'ceros') {
+                            coloInit = coloresInicialesInt[(9)];
+                        }
+                        elm.municipios[j].color = coloInit;
+                        break;
+                    }
+                }
+                else{
+                    if (entre_D3(dataEstra[i].limSuperior, dataEstra[i].limInferior, (elm.municipios[j].valor).replace(/,/g, ''))) {
+                        elm.municipios[j].estrato = dataEstra[i].nestrato;
+                        let coloInit = coloresInicialesInt[dataEstra[i].nestrato];
+                        if (dataEstra[i].nestrato == 'extremosar') {
+                            coloInit = coloresInicialesInt[(11)];
+                        }
+                        if (dataEstra[i].nestrato == 'extremosab') {
+                            coloInit = coloresInicialesInt[(10)];
+                        }
+                        if (dataEstra[i].nestrato == 'ceros') {
+                            coloInit = coloresInicialesInt[(9)];
+                        }
+                        elm.municipios[j].color = coloInit;
+                        break;
+                    }
+                }
+               
+            }
+        }
+        let cont= document.getElementById(elm.id);
+        let mesc =  cont.getAttribute('data-mestra');
+        let mpal =  cont.getAttribute('data-mpaleta');
+        let divobj=document.getElementById('divobj_' +elm.id);
+               if(mesc==='true'||mpal==='true'){
+                let divContenedor=cr_btnGear(elm, divobj);
+                //valida el parámetro para mostrar las opciones de estratos y ademas valida que no se manden estratos fijos
+                if(mesc==='true' && elm.tipoEstratifica!='fijos')
+                     cr_radiobtn(divContenedor,parametrosOrig);
+                if(mpal==='true')
+                    cr_paletacolores(divContenedor,elm.id);
+            }
+    } catch (error) {
+        console.log("webApiClasificaDatosFijos"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+
+};
+
+const getDecimales_D3 = (valor, anterior) => {
+    try {
+        let decimales = 0;
+        if (valor.indexOf('.') > 0) {
+            decimales = (valor.substring(valor.indexOf('.') + 1, valor.length)).length;
+        }
+    
+        if (decimales > anterior) {
+            return decimales;
+        }
+        else {
+            return anterior;
+        }
+        
+    } catch (error) {
+        console.log("getDecimales_D3"+error);
+    } 
+};
+
+const formatear_D3 = (texto, elm) => {
+    let txtf = texto;
+
+    for (let j = 0; j < elm.municipios.length; j++) {
+
+        let vvalor = 'V\\{' + elm.municipios[j].municipio + '\\}';
+        let nnombre = 'N\\{' + elm.municipios[j].municipio + '\\}';
+
+        let reg1 = new RegExp(vvalor, 'gi');
+        let reg2 = new RegExp(nnombre, 'gi');
+
+        txtf = txtf.replace(reg1, elm.municipios[j].valor);
+        txtf = txtf.replace(reg2, elm.municipios[j].nombre);
+    }
+    return txtf;
+};
+
+const  fetchingDataMeta = async (dataAll,elm,parametrosOrig,D3parametros,elmObjmapa) => {
+    let dataFuentes=[];
+     try {
+        let txt_unidadMedida='';
+         const resp =await setMetadatosD3(elm);
+         if(resp["NOTAS"]!=null){
+            if(resp["NOTAS"].length!=0){
+                if(resp["NOTAS"].length>1){
+                    for(let n=0;n<resp["NOTAS"].length;n++){
+                        elm.notas=elm.notas+ resp["NOTAS"][n].NOTA+'</br>';
+                    }
+                }
+                else
+                elm.notas = resp["NOTAS"][0].NOTA;
+            }
+        }
+        if(elm.unidadMedidaM){
+            if(resp.NOMBRE_UNIDAD!=null){
+                if( resp.NOMBRE_UNIDAD!="Es nulo"){
+                    if( resp.NOMBRE_UNIDAD!=""){
+                        if(resp.FACTOR!=null){
+                            elm.unidadMedida = resp.FACTOR+' de '+resp.NOMBRE_UNIDAD;
+                            txt_unidadMedida = ' ' + resp.FACTOR+' de '+resp.NOMBRE_UNIDAD;
+                        }else{
+                            elm.unidadMedida = resp.NOMBRE_UNIDAD;
+                            txt_unidadMedida = ' ' + resp.NOMBRE_UNIDAD;
+                        }                  
+                    }
+                }
+            }
+        }
+      
+        if(resp["FUENTES"]!=null){
+            if(resp["FUENTES"].length>1){
+                for(let f=0;f<resp["FUENTES"].length;f++){
+                    dataFuentes.push(new arrayfuente(resp["FUENTES"][f].NOMBRE_FUENTE,resp["FUENTES"][f].URL_PROYECTO));
+                }
+            }
+            else{
+                dataFuentes.push(new arrayfuente(resp["FUENTES"][0].NOMBRE_FUENTE,resp["FUENTES"][0].URL_PROYECTO));
+            }
+            elm.fuentes= dataFuentes;
+        }
+        if(parametrosOrig.mum_f!=''){
+            txt_unidadMedida=txt_unidadMedida+' '+parametrosOrig.mum_f;
+            document.getElementById('spanUnidad_' + elm.id).innerHTML =txt_unidadMedida;
+            document.getElementById('spanUnidad_' + elm.id).style.display = 'inline';
+        }
+        else{
+            document.getElementById('spanUnidad_' + elm.id).innerHTML =txt_unidadMedida;
+        }
+
+        RevisaInfo(dataAll,elm,parametrosOrig,D3parametros,elmObjmapa);
+     } catch (error) {
+         console.log("fetchingDataMeta"+error);
+         iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+     }
+};
+
+const  setMunicipiosAllD3 = (dataAll,elm,parametrosOrig,D3parametros,elmObjmapa) => {
+    try {
+            let txt_periodof='';
+            generaColoresD3(dataAll.estratos,D3parametros);
+            
+            elm.municipios=dataAll.elementos;
+            elm.nombre = dataAll.elementos[0].Nombre_Entidad;
+        
+            for (let i = 0; i < dataAll.elementos.length; i++) {
+                let valOp = '';
+                if (elm.oportuno === 1) {
+                    valOp = dataAll.elementos[i].valor;
+                    if (i == 0) {
+                        if (elm.periodoM) {
+                            txt_periodof = dataAll.elementos[1].periodo;
+                        }
+                        else{
+                            document.getElementById('spanPer_' + elm.id).style.display = 'none';
+                        }
+                        if (elm.valorM) {
+                            let dtot = document.getElementById('spanTotal_' + elm.id);
+                            dtot.innerHTML = dataAll.elementos[0].valor;
+                        }else{
+                            document.getElementById('spanTotal_' + elm.id).style.display = 'none';
+                        }
+                        if (elm.unidadMedidaM||parametrosOrig.mum_f!='') {
+                            document.getElementById('spanUnidad_' + elm.id).style.display = 'inline';
+                        }else{
+                            document.getElementById('spanUnidad_' + elm.id).style.display = 'none';
+                        }
+                        
+                    }
+                }
+                else {
+                    let objOp = $.grep(dataEnti[i].Valores, function (ex) { return ex.Periodo == elm.anio; });
+                    
+                    if (objOp.length > 0) {
+                        valOp = objOp[0].Valor;
+                    }
+                    else {
+                        valOp = 'No existe información para mostrar';
+                    }
+                }
+        
+            }
+            if(parametrosOrig.mup_f!=''){
+                txt_periodof=txt_periodof+' '+parametrosOrig.mup_f;
+                document.getElementById('spanPer_' + elm.id).innerHTML =txt_periodof;
+                document.getElementById('spanPer_' + elm.id).style.display = 'block';
+            }
+            else{
+                document.getElementById('spanPer_' + elm.id).innerHTML =txt_periodof;
+            }
+
+            D3parametros.informacion=elmObjmapa;
+            let cont= document.getElementById(elm.id);
+            let mesc = cont.getAttribute('data-mestra');
+            let mpal = cont.getAttribute('data-mpaleta');
+            let divobj=document.getElementById('divobj_' +elm.id);
+            if(mesc==='true'||mpal==='true'){
+                let divContenedor=cr_btnGear(elm, divobj);
+                if(mesc==='true' && elm.tipoEstratifica!='fijos')
+                    cr_radiobtn(divContenedor,parametrosOrig);
+                if(mpal==='true')
+                    cr_paletacolores(divContenedor,elm.id);
+            }
+            
+                iniciaMapD3(D3parametros,'normal');//llama al camponente d3
+                quitarloading(elm);
+                
+    } catch (error) {
+        console.log("setMunicipiosAllD3"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+    
+};
+
+const  RevisaInfo= (dataAll,elm,parametrosOrig,D3parametros,elmObjmapa) => {
+    try {
+        if(dataAll.elementos.length==undefined){
+            iniciaMapD3(D3parametros,'simplegris');//CREARA UN MAPA GRIS AL NO HABER INFORMACION
+            quitarloading(elm);
+        }
+        else{
+            if(paramPeriodoVacio)
+                setMunicipiosAllD3(dataAll,elm,parametrosOrig,D3parametros,elmObjmapa);
+            else{
+                 //Validamos que la informacion sea del Periodo solicitado
+                let objValores = $.grep(dataAll.elementos, function (ex) { 
+                    return ex.periodo == parametrosOrig.pf.toString(); });
+                if(objValores.length>0){
+                    setMunicipiosAllD3(dataAll, elm,parametrosOrig,D3parametros,elmObjmapa);}
+                else{
+                    if(elm.periodo=='')
+                        elm.periodo = dataAll.elementos[0].periodo;
+                        iniciaMapD3(D3parametros,'simplegris');//CREARA UN MAPA GRIS AL NO HABER INFORMACION DEL PERIODO
+                        quitarloading(elm);}
+            }
+           
+        }
+    } catch (error) {
+        console.log("RevisaInfo"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+};
+
+
+const registraApiMeta = async (elm,parametrosOrig) => {
+    let dataFuentes=[];
+    let txt_unidadMedida='';
+    try {
+        const resp =await setMetadatosD3(elm);
+        if(resp["NOTAS"]!=null){
+            if(resp["NOTAS"].length!=0){
+                if(resp["NOTAS"].length>1){
+                    for(let n=0;n<resp["NOTAS"].length;n++){
+                        elm.notas=elm.notas+ resp["NOTAS"][n].NOTA+'</br>';
+                    }
+                }
+                else
+                elm.notas = resp["NOTAS"][0].NOTA;
+            }
+        }
+        if(elm.unidadMedidaM){
+            if(resp.NOMBRE_UNIDAD!=null){
+                if( resp.NOMBRE_UNIDAD!="Es nulo"){
+                    if( resp.NOMBRE_UNIDAD!=""){
+                        if(resp.FACTOR!=null){
+                            elm.unidadMedida = resp.FACTOR+' de '+resp.NOMBRE_UNIDAD;
+                            txt_unidadMedida = ' ' + resp.FACTOR+' de '+resp.NOMBRE_UNIDAD;
+                        }
+                        else{
+                            elm.unidadMedida = resp.NOMBRE_UNIDAD;
+                            txt_unidadMedida = ' ' + resp.NOMBRE_UNIDAD;
+                        }
+
+                    }
+                }    
+            }
+        }
+      
+        if(resp["FUENTES"]!=null){
+            if(resp["FUENTES"].length>1){
+                for(let f=0;f<resp["FUENTES"].length;f++){
+                    dataFuentes.push(new arrayfuente(resp["FUENTES"][f].NOMBRE_FUENTE,resp["FUENTES"][f].URL_PROYECTO));
+                }
+            }
+            else{
+                dataFuentes.push(new arrayfuente(resp["FUENTES"][0].NOMBRE_FUENTE,resp["FUENTES"][0].URL_PROYECTO));
+            }
+            elm.fuentes= dataFuentes;
+        }
+        if(parametrosOrig.mum_f!=''){
+            txt_unidadMedida=txt_unidadMedida+' '+parametrosOrig.mum_f;
+            document.getElementById('spanUnidad_' + elm.id).innerHTML =txt_unidadMedida;
+            document.getElementById('spanUnidad_' + elm.id).style.display = 'inline';
+        }
+        else{
+            document.getElementById('spanUnidad_' + elm.id).innerHTML =txt_unidadMedida;
+        }
+
+    } catch (error) {
+        console.log("registraApiMeta"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+   
+};
+
+const fetchingDataInfo = async (parametrosOrig,estrato,callback,elm,D3parametros) => {
+    let  elmObjmapa;
+    let dataEnti=[];
+    let dataMun=[];
+    let resultData=[];
+    try {
+        if(D3parametros.cobertura==='mun'){
+            for(let i=1;i<33;i++){
+                if(i<10){
+                    parametrosOrig.ageo='0'+i;
+                    resultData= await getApiIndicadores(parametrosOrig);
+                }            
+                else{
+                    parametrosOrig.ageo=i;
+                    resultData= await getApiIndicadores(parametrosOrig);
+                }
+                for(let x=0;x<resultData.length;x++){
+                    if(resultData[x].Municipio!='0')
+                        dataMun.push(resultData[x]);
+                }
+            }
+        }
+        D3parametros.dataMun=dataMun;
+        parametrosOrig.ageo="00";
+        dataEnti= await getApiIndicadores(parametrosOrig);
+        
+        
+        
+            //validamos si se mando el parámetro pf, al no mandarse se le asigna el último periodo 
+            if(elm.periodo=='0'||elm.periodo==0||elm.periodo==''){
+                let ultperiodo;
+                if(dataEnti[0].Valores.length>1){
+                    for(let p=0;p>dataEnti[0].Valores.length;p++){
+                        if(p==0){
+                            ultperiodo=dataEnti[0].Valores[p].Periodo;
+                        }
+                        else{
+                            if(ultperiodo<dataEnti[0].Valores[p].Periodo){
+                                ultperiodo=dataEnti[0].Valores[p].Periodo;
+                            }
+                        }
+                        
+                    }
+                    parametrosOrig.pf=ultperiodo;
+                    elm.periodo = ultperiodo;
+                }
+                parametrosOrig.pf=dataEnti[0].Valores[0].Periodo;
+                elm.periodo = dataEnti[0].Valores[0].Periodo;
+            }
+            elmObjmapa=dataEnti;
+            acomodo_D3(parametrosOrig, estrato,dataEnti, callback,elm,D3parametros,elmObjmapa);
+    } 
+    catch (error) {
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+        console.log ("fetchingDataInfo"+error)
+    }
+};
+
+const  getApiIndicadores = (parametrosOrig) => {
+
+    let entidad=parametrosOrig.ageo;
+    let indicador=parametrosOrig.indica;
+    let oportuno = 1;
+    let tkm = '9f161bde-19af-31b0-e4fe-aee373b1df89';
+
+    sitioIng = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+    tituloIndicadores_D3 = true;
+    let urlApiIndix;
+    if (parametrosOrig.tm===undefined)
+        urlApiIndix = urlApiIndi_D3.replace('entMap', entidad).replace('indicaMp', indicador).replace('oport', oportuno).replace('tokenMap', tkm).replace('llamado', cambiollamaApi_D3().replace('ln', (sitioIng) ? 'en' : 'es'));
+    else
+        urlApiIndix = urlApiIndi_tm.replace('entMap', entidad).replace('indicaMp', indicador).replace('oport', oportuno).replace('tm',parametrosOrig.tm).replace('tokenMap', tkm).replace('llamado', cambiollamaApi_D3().replace('ln', (sitioIng) ? 'en' : 'es'));
+    
+        $.support.cors = true;
+    return new Promise((resolve, reject)=>{
+        $.ajax({
+            dataType: "jsonp",
+            url: urlApiIndix,
+            data: "",
+            cache: false,
+            success(datosEnti){
+               resolve(datosEnti);
+            }
+        });
+    }) ;     
+};
+
+const acomodo_D3 = (parametrosOrig, estrato,dataEnti,  callback,elm,D3parametros,elmObjmapa) => {
+    let vctKD = new Array();
+    for (let i = 1; i < dataEnti.length; i++) {
+        if (!isNaN((dataEnti[i].Valores[0].Valor).replace(/,/g, ''))) {
+            vctKD.push(parseFloat((dataEnti[i].Valores[0].Valor).replace(/,/g, '')));
+        }
+    }
+    fetchingDataEstrato(parametrosOrig, estrato,dataEnti, vctKD,  callback,elm,D3parametros,elmObjmapa);
+};
+
+const fetchingDataEstrato = async (parametrosOrig, estrato,dataEnti, vctKD,  callback,elm,D3parametros,elmObjmapa) => {
+    try {
+        if(elm.tipoEstratifica==='fijos'){
+            const dataEstra= parametrosOrig.estra_f;
+            generaJson_D3(parametrosOrig, dataEnti, dataEstra, callback,elm,D3parametros,elmObjmapa);
+        }else{
+            const dataEstra= await getJsonEstratoo( estrato,vctKD,  elm);
+            generaJson_D3(parametrosOrig, dataEnti, dataEstra, callback,elm,D3parametros,elmObjmapa);
+        }
+     
+    } catch (error) {
+        console.log("fetchingDataEstrato"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+};
+
+const getJsonEstratoo =( estrato, vctKD, elm) =>{
+    let tipo=estrato;
+    let valorEstra = {
+        valores: vctKD,
+        tipoEstra: tipo
+    };
+    return new Promise ((resolve,reject)=>{
+        $.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            method: "POST",
+            url: "/app/api/mapaTematico/mapaTem/obtenerEntidad",
+            data: JSON.stringify(valorEstra),
+            cache: false,
+            success: function (datosEstra) {
+               resolve(datosEstra);
+            },
+            error: function (e) {
+                iniciaMapD3(D3parametros,'simplect');////CREARA UN MAPA GRIS AL NO HABER INFORMACION pero con tooltips
+                quitarloading(elm);
+                throw e; 
+            }
+        });
+    });
+       
+};
+
+const generaJson_D3 = (parametrosOrig, dataEnti, dataEstra, callback,elm,D3parametros,elmObjmapa) => {
+    try {
+        let entidad=parametrosOrig.ageo;
+        let lstMunEnt = new Array();
+        
+        //validación para los casos donde no hay dato Nacional
+        if(dataEnti[0].Entidad != '00' && dataEnti[0].Entidad != '0')
+            lstMunEnt.push(new munEnt_D3('', '','', '','')); 
+    
+        for (let x = 0; x < dataEnti.length; x++) {
+            if (entidad === "00") {
+                lstMunEnt.push(new munEnt_D3(dataEnti[x].Entidad, dataEnti[x].Nombre_Entidad, dataEnti[x].Valores[0].Valor, '',dataEnti[x].Valores[0].Periodo));
+            }
+            else {
+                lstMunEnt.push(new munEnt_D3(dataEnti[x].Municipio, dataEnti[x].Nombre_Municipio, dataEnti[x].Valores[0].Valor, '',dataEnti[x].Valores[0].Periodo));
+            }
+        }
+        for (let j = 1; j < lstMunEnt.length; j++) {
+            for (let i = 0; i < dataEstra.length; i++) {
+                if(elm.tipoEstratifica=='fijos'){
+                    if (condicionPersonalizada(dataEstra[i].limSuperior, dataEstra[i].limInferior, (lstMunEnt[j].valor).replace(/,/g, ''),dataEstra[i].operadorS,dataEstra[i].operadorI)) {
+                        lstMunEnt[j].estrato = dataEstra[i].nestrato;
+                        let coloInit = coloresIniciales_D3[dataEstra[i].nestrato];
+                        if (dataEstra[i].nestrato == 'extremosar') {
+                            coloInit = coloresIniciales_D3[(11)];
+                        }
+                        if (dataEstra[i].nestrato == 'extremosab') {
+                            coloInit = coloresIniciales_D3[(10)];
+                        }
+                        if (dataEstra[i].nestrato == 'ceros') {
+                            coloInit = coloresIniciales_D3[(9)];
+                        }
+                        lstMunEnt[j].color = coloInit;
+                        break;
+                    }
+                }
+                else{
+                    if (entre_D3(dataEstra[i].limSuperior, dataEstra[i].limInferior, (lstMunEnt[j].valor).replace(/,/g, ''))) {
+                        lstMunEnt[j].estrato = dataEstra[i].nestrato;
+                        let coloInit = coloresIniciales_D3[dataEstra[i].nestrato];
+                        if (dataEstra[i].nestrato == 'extremosar') {
+                            coloInit = coloresIniciales_D3[(11)];
+                        }
+                        if (dataEstra[i].nestrato == 'extremosab') {
+                            coloInit = coloresIniciales_D3[(10)];
+                        }
+                        if (dataEstra[i].nestrato == 'ceros') {
+                            coloInit = coloresIniciales_D3[9];
+                        }
+                        lstMunEnt[j].color = coloInit;
+                        break;
+                    }
+                }
+    
+            }
+        }
+            length=lstMunEnt.length-1;
+            if(lstMunEnt.length!=33){
+                lstMunEnt[length+1]={'Entidad':'9'};
+            }
+        
+       
+        let jsonRes = {
+            estratos: dataEstra,
+            elementos: lstMunEnt
+        };
+        callback(jsonRes,elm,parametrosOrig,D3parametros,elmObjmapa);
+    } catch (error) {
+        console.log("generaJson_D3"+error);
+        iniciaMapD3(D3parametros,'simplegris'); //crea un mapa gris al haber un error
+    }
+ 
+};
+
+const getJsonEstratoMun=( estrato, vctKD) =>{
+    let tipo=estrato;
+
+    let valorEstra = {
+        valores: vctKD,
+        tipoEstra: tipo
+    };
+    return new Promise ((resolve,reject)=>{
+        $.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            method: "POST",
+            url: "/app/api/mapaTematico/mapaTem/obtenerEntidad",
+            data: JSON.stringify(valorEstra),
+            cache: false,
+            success: function (datosEstra) {
+                console.log("Estratosmun " + JSON.stringify(datosEstra));
+                resolve(datosEstra);
+            },
+            error: function (e) {
+               console.log("getJsonEstratoMun"+e);
+                throw e; 
+            }
+        });
+    });
+       
+};
+
+//LLAMADO AL API DE METADATOINDICADOR
+const setMetadatosD3=(elm)=> {
+    
+    let tkm = '9f161bde-19af-31b0-e4fe-aee373b1df89';
+    sitioIng = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+    let urlApiIndix ;
+    if (elm.tm===undefined)
+        urlApiIndix = urlApiMeta_D3.replace('indicaMp', elm.indicador).replace('oport', elm.oportuno).replace('periodoMp', elm.periodo).replace('periodoMp', elm.periodo).replace('tokenMap', tkm).replace('llamado', cambiollamaApi_D3()).replace('ln', (sitioIng) ? 'en' : 'es');
+    else
+        urlApiIndix = urlApiMeta_tm.replace('indicaMp', elm.indicador).replace('oport', elm.oportuno).replace('tm',elm.tm).replace('periodoMp', elm.periodo).replace('periodoMp', elm.periodo).replace('tokenMap', tkm).replace('llamado', cambiollamaApi_D3()).replace('ln', (sitioIng) ? 'en' : 'es');
+        // $.getJSON("http://www.inegi.org.mx/app/api/indicadores/interna_v1_1/API.svc/MetadatoIndicador/es/"+elm.indicador+"/00000/"+ elm.periodo+"/"+ elm.periodo+"/1/json/563cbaa8-58bb-fef8-6763-1f1dae318f99", function (resp) { 
+   return new Promise((resolve,reject)=>{
+        $.getJSON(urlApiIndix , function (respuesta) { 
+            resolve(respuesta);
+        });
+   });
+};
+
+const generaColoresD3 = (dataEstra,D3parametros) => { 
+    try {
+        let coloInit= [];
+        let ulInfo = cr_elem_D3('ul', '', '', '');
+        rangecolores=[];
+        let extremos = '';
+        let coloresInicialesInt = coloresIniciales_D3;
+    
+    
+        if (dataEstra[0].etiqueta !== undefined && dataEstra[0].etiqueta !== '') {
+    
+            for (let i = 0; i < dataEstra.length; i++) {
+                let coloInit = coloresInicialesInt[dataEstra[i].nestrato];
+                rangecolores.push(coloInit);
+            }
+    
+        }
+        else {
+            
+            for (let i = 0; i < dataEstra.length; i++) {
+                if (dataEstra[i].nestrato == 'ceros') {
+                    dataEstra[i].nestrato = 0;
+                    coloInit = coloresInicialesInt[(9)];
+                    rangecolores.push(coloInit);
+                }
+                else if (dataEstra[i].nestrato == 'extremosar') {
+                    coloInit = coloresInicialesInt[(11)];
+                    extremos = '*';
+                    rangecolores.push(coloInit);
+                }
+                else if (dataEstra[i].nestrato == 'extremosab') {
+                    coloInit = coloresInicialesInt[(10)];
+                    extremos = '*';
+                    rangecolores.push(coloInit);
+                }else{
+                    coloInit = coloresInicialesInt[dataEstra[i].nestrato];
+                    rangecolores.push(coloInit);
+                }
+            }
+        }
+        if (extremos == '*') {
+            let txin;
+            if (encDomIng) {
+                txin = ['', 'See more']
+            } else {
+                txin = ['*Unidades geográficas con valores que se alejan del resto.', 'Ver más']
+            }
+    
+            ulInfo.appendChild(cr_elem_D3('div', '', { 'class': 'clearfix' }, ''));
+            ulInfo.appendChild(cr_elem_D3('div', '', { 'style': 'text-align: left;', 'class': 'col-md-12' }, '' + txin[0] + ' <a href="/componentes/mapaTematico/doc/nota_cug.pdf" target="_blank">' + txin[1] + '</a>'));
+        }
+        D3parametros.idioma=encDomIng;
+        D3parametros.estratoslim=dataEstra;
+        if(paramUndefined)
+            D3parametros.colores=rangecolores;
+        else{
+            if(D3parametros.paleta.length!=0||D3parametros.paleta!='')
+            D3parametros.colores=D3parametros.paleta;
+        else
+            D3parametros.colores=rangecolores;
+        }
+    } catch (error) {
+        console.log("setMunicipiosAllD3"+error);
+        iniciaMapD3(generaColoresD3,'simplegris'); //crea un mapa gris al haber un error
+    }
+};
+
+const quitarloading = (elm) =>{
+    try {
+        let elesperar = document.getElementById('cargaMapa_' + elm.id);
+        if (elesperar) {
+            elesperar.style.display = 'none';
+        }
+        
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const importarScript_Callback = (nombre, callback) => {
+    let s = document.createElement("script");
+    s.onload = callback;
+    s.src = nombre;
+    document.querySelector("head").appendChild(s);
+};
+
+const importarScript = (nombre) => {
+    let s = document.createElement("script");
+    s.src = nombre;
+    document.querySelector("head").appendChild(s);
+};
+
+//recibe limSup, limInf,Valor, OperadorSup,OperadorInf
+const condicionPersonalizada = (a, b, x, w, z) => {
+    //console.log(x+z+b+'&&'+x+w+a);
+    if (x == '') { return false; }
+    else{
+        let CS = true, CI = true;
+        let infS = false, infI = false;
+
+        //revisamos si el limSup trae el signo ?, que significa infinito
+        if (/[?]/i.test(a.toString())) {
+            a = a.toString().replace(/[?]/i, '');
+            infS = true;
+        }
+
+        //revisamos si el limInf trae el signo ?, que significa infinito
+        if (/[?]/i.test(b.toString())) {
+            b = b.toString().replace(/[?]/i, '');
+            infI = true;
+        }
+
+        let min = Math.min(a, b),
+            max = Math.max(a, b);
+
+        if(!infI){
+                switch (z) {
+                    case '>':
+                        CI=parseFloat(x)>min;
+                     
+                    break;
+                    case '>=':
+                        CI=parseFloat(x)>=min;
+                    break;
+                    case '<':
+                        CI=parseFloat(x)<min;
+                     
+                    break;
+                    case '<=':
+                        CI=parseFloat(x)<=min;
+                    break;
+                    case '==':
+                        CI= min==parseFloat(x);
+                    break;
+                    default:
+                        break;
+                }
+            }
+    if(!infS){
+        switch (w) {
+            case '<':
+                CS=parseFloat(x)<max;
+                break;
+            case '<=':
+                CS=parseFloat(x)<=max;
+            break;
+            case '>':
+                CS=parseFloat(x)>max;
+                break;
+            case '>=':
+                CS=parseFloat(x)>=max;
+            break;
+            case '==':
+                if(parseFloat(x)==max)
+                    CS=true;
+                else
+                    CS=false;
+                break;
+            default:
+                break;
+        }
+    }
+
+    let t=CI && CS;
+    return  t;
+    }
+};
+
+const entre_D3 = (a, b, x) => {
+    if (x == '') { return false; }
+
+    let CS = true, CI = true;
+
+    if (/[$]/i.test(a.toString())) {
+        a = a.toString().replace(/[$]/i, '');
+        CS = !CS;
+    }
+
+    if (/[$]/i.test(b.toString())) {
+        b = b.toString().replace(/[$]/i, '');
+        CI = !CI;
+    }
+
+    let min = Math.min(a, b),
+        max = Math.max(a, b);
+
+    let decimin = 0;
+    let decimax = 0;
+
+    if (min.toString().indexOf('.') > -1) {
+        decimin = min.toString().split('.')[1].length;
+    }
+
+    if (max.toString().indexOf('.') > -1) {
+        decimax = max.toString().split('.')[1].length;
+    }
+
+    if (x.toString().indexOf('.') > -1) {
+        if (decimax == 0)
+            decimax = x.toString().split('.')[1].length;
+        if (decimin == 0)
+            decimin = x.toString().split('.')[1].length;
+    }
+
+    if (CS && CI) {
+        //return parseFloat(x).toFixed(decimin) >= min && parseFloat(x).toFixed(decimax) <= max;
+        return parseFloat(x) >= min && parseFloat(x) <= max;
+    }
+
+    if (CS && !CI) {
+        //return parseFloat(x).toFixed(decimin) > min && parseFloat(x).toFixed(decimax) <= max;
+        return parseFloat(x) > min && parseFloat(x) <= max;
+    }
+
+    if (!CS && CI) {
+        //return parseFloat(x).toFixed(decimin) >= min && parseFloat(x).toFixed(decimax) < max;
+        return parseFloat(x) >= min && parseFloat(x) < max;
+    }
+
+    if (!CS && !CI) {
+        //return parseFloat(x).toFixed(decimin) > min && parseFloat(x).toFixed(decimax) < max;
+        return parseFloat(x) > min && parseFloat(x) < max;
+    }
+};
+
+const cr_elem_D3 = (a, b, e, z) => {
+    let elem = document.createElement(a);
+    if (e != '') {
+        for (x in e) {
+            elem.setAttribute(x, e[x]);
+        }
+    }
+    elem.innerHTML = z;
+    let textnode = document.createTextNode(b);
+    elem.appendChild(textnode);
+    return elem;
+};
+
+//creacion de elementos para configurar el mapa
+const cr_btnGear = (elm, row) => {
+    try {
+        if(elm=='mapaTematico'){
+            elm.id='mapaTematico';
+        }
+        let objelm=JSON.stringify(elm);
+        let  sitioIng = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+        let gp = document.createElement("div");
+        gp.setAttribute('id', 'divGear'+elm.id);
+        //gp.setAttribute('style', 'top:23px;');
+        gp.setAttribute('class', 'btn-group menubuttons');
+    
+        let inputs = document.createElement("button");
+        inputs.setAttribute('type', 'button');
+        inputs.setAttribute('id', 'btnGearMap'+elm.id);
+        inputs.setAttribute('class', 'btn btn-default btn-md btnGearMap');
+        inputs.setAttribute('title', (sitioIng) ? 'Setting' : 'Configuración del mapa');
+        inputs.setAttribute('aria-controls','contentP');
+        inputs.setAttribute('data-target','#contentP'+elm.id);
+        inputs.setAttribute('style', 'font-size:15pt;');
+        inputs.setAttribute('onclick', 'configOpen('+objelm+')');
+    
+        let sp = document.createElement("span");
+        sp.setAttribute('class', 'glyphicon glyphicon-cog');
+        sp.setAttribute('aria-hidden', 'true');
+        sp.setAttribute('style', 'color:black !important');
+    
+        gp.appendChild(inputs);
+        inputs.appendChild(sp);
+        row.appendChild(gp);
+    
+       // $('#btnGearMap'+elm.id).tooltip();
+    
+        let divCon = document.createElement("div");
+        divCon.setAttribute('id', 'contentP'+elm.id);
+        divCon.setAttribute('style', 'text-align:left');
+        divCon.setAttribute('class', 'sidepanel contentP');
+        let divP=document.createElement("div");
+        divP.setAttribute('id', 'contentConfig'+elm.id);
+    
+        divP.setAttribute('style', 'opacity:0;height:100%');
+    
+        let cont= document.getElementById(elm.id);
+        let mesc =  cont.getAttribute('data-mestra');
+        let mpal =  cont.getAttribute('data-mpaleta');
+        if(mesc==='true' && !mpal==='true')
+            divP.setAttribute('style', 'opacity:0;height:100%;margin-top:10px');
+        if(mpal==='true' && !mesc==='true')
+        divP.setAttribute('style', 'opacity:0;height:100%;margin-top:10px');
+    
+        if(mesc==='true'){
+            let labelR=document.createElement("label");
+            if (encDomIng) 
+                labelR.innerHTML="Select a stratification method:";
+            else
+                labelR.innerHTML="Seleccione un método de estratificación:";
+            labelR.setAttribute('style', 'display:block !important;margin-left: 8px;');
+            divP.appendChild(labelR);
+        }
+        
+    
+        divCon.appendChild(divP);
+    
+        row.appendChild(divCon);
+        return divP;
+        
+    } catch (error) {
+        console.log("cr_btnGear: "+error)
+        
+    }
+   
+};
+const cr_radiobtn = (row,parametrosOrig) => { 
+    let objparam=JSON.stringify(parametrosOrig);
+    let input2 = document.createElement("input");
+    input2.setAttribute('type', 'radio');
+    input2.setAttribute('id', 'rbscaleQuantile'+parametrosOrig.id);
+    input2.setAttribute('class', 'form-check-input');
+    input2.setAttribute('name', 'scaleradio'+parametrosOrig.id);
+    if(parametrosOrig.estra==undefined||parametrosOrig.estra=='3')
+        input2.setAttribute('checked', 'true');
+    input2.setAttribute('style', 'margin: 3px 3px 0px 5px;');
+    input2.setAttribute('value', '3');
+    input2.setAttribute('onclick','clicRadio(' +objparam+ ')');
+
+
+    let sp2 = document.createElement("label");
+    sp2.setAttribute('class', 'form-check-label');
+    sp2.setAttribute('style', 'font-weight: normal;');
+    sp2.innerHTML="Cuantil";
+    row.appendChild(input2);
+    row.appendChild(sp2);
+
+    /*let input1 = document.createElement("input");
+    input1.setAttribute('type', 'radio');
+    input1.setAttribute('id', 'rbscaleQuantize');
+    input1.setAttribute('class', 'form-check-input');
+    input1.setAttribute('name', 'scaleradio');
+    if(parametrosOrig.estra=='3')
+        input1.setAttribute('checked', 'true');
+    input1.setAttribute('style', 'margin: 3px 3px 0px 5px;');
+    input1.setAttribute('value', '3');
+    input1.setAttribute('onclick', 'clicRadio()');
+    
+ 
+
+    let sp1 = document.createElement("label");
+    sp1.setAttribute('class', 'form-check-label');
+    sp1.setAttribute('style', 'font-weight: normal;');
+    sp1.innerHTML="Cuantizar";
+
+    row.appendChild(input1);
+    row.appendChild(sp1);*/
+  
+
+
+    let input3 = document.createElement("input");
+    input3.setAttribute('type', 'radio');
+    input3.setAttribute('id', 'rbscalekmedias'+parametrosOrig.id);
+    input3.setAttribute('class', 'form-check-input');
+    input3.setAttribute('name', 'scaleradio'+parametrosOrig.id);
+    if(parametrosOrig.estra=='1')
+        input3.setAttribute('checked', 'true');
+    input3.setAttribute('style', 'margin: 3px 3px 0px 5px;');
+    input3.setAttribute('value', '1');
+    input3.setAttribute('onclick','clicRadio(' +objparam+ ')');
+
+    let sp3 = document.createElement("label");
+    sp3.setAttribute('class', 'form-check-label');
+    sp3.setAttribute('style', 'font-weight: normal;');
+    sp3.innerHTML="K-medias";
+    row.appendChild(input3);
+    row.appendChild(sp3);
+
+    let input4 = document.createElement("input");
+    input4.setAttribute('type', 'radio');
+    input4.setAttribute('id', 'rbscaleDalenius'+parametrosOrig.id);
+    input4.setAttribute('class', 'form-check-input');
+    input4.setAttribute('name', 'scaleradio'+parametrosOrig.id);
+    if(parametrosOrig.estra=='2')
+        input4.setAttribute('checked', 'true');
+    input4.setAttribute('style', 'margin: 3px 3px 0px 5px;');
+    input4.setAttribute('value', '2');
+    input4.setAttribute('onclick', 'clicRadio(' +objparam+ ')');
+
+    let sp4 = document.createElement("label");
+    sp4.setAttribute('class', 'form-check-label');
+    sp4.setAttribute('style', 'font-weight: normal;');
+    sp4.innerHTML="Dalenius";
+    row.appendChild(input4);
+    row.appendChild(sp4);
+
+};
+const  cr_paletacolores = (row,idp) => {
+    let rb = document.createElement("div");
+    rb.setAttribute('id', 'paletas'+idp);
+    rb.setAttribute('class', 'paletas');
+    rb.setAttribute('style','margin-left: 8px;margin-top: 10px;');
+    let label=document.createElement("label");
+    label.setAttribute('style', 'display:block !important;');
+    if (encDomIng) 
+        label.innerHTML="Select a color palette:";
+    else
+        label.innerHTML="Seleccione una paleta de colores:";
+    rb.appendChild(label);
+    row.appendChild(rb);
+};
+const cr_btnExcel_D3 = (id, row,cobertura) => {
+    //let row = document.getElementById('mapa_trauma_divbtns_' + idExcel);
+    let ExcelPr = document.createElement("div");
+    ExcelPr.setAttribute('id', 'btnExcel');
+    ExcelPr.setAttribute('class', 'btn-group menubuttons');
+    ExcelPr.setAttribute('style', 'right: 5px;position: absolute;','display: block;');
+    
+    let input = document.createElement("input");
+    input.setAttribute('type', 'image');
+    input.setAttribute('src','/img/ico/ico_xls.png');
+    input.setAttribute('class','btn btn-link btn-xs');
+    input.setAttribute('style','cursor: pointer');
+    input.setAttribute('style','float:right;');
+    input.setAttribute('onclick', 'genTabled3("' + id + '",true,"'+cobertura+'")');
+    //input.setAttribute('style','top:10px;'); 
+
+    let ExcelMap = document.createElement("span");
+    ExcelMap.setAttribute('aria-hidden', 'true');
+  
+    ExcelPr.appendChild(input);
+    input.appendChild(ExcelMap);
+    row.appendChild(ExcelPr);
+};
+const cr_btnImp_D3 = (id, row) => {
+    let inputs, sitioIng = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+    let gp = document.createElement("div");
+    gp.setAttribute('id', 'btngImp');
+    gp.setAttribute('class', 'btn-group menubuttons');
+    gp.setAttribute('style', 'top: 25px; right: 5px;position: absolute; display: block;');
+
+    inputs = document.createElement("button");
+    inputs.setAttribute('type', 'button');
+    inputs.setAttribute('id', 'btnImpMap');
+    inputs.setAttribute('class', 'btn btn-default btn-md');
+    inputs.setAttribute('title', (sitioIng) ? 'Print map' : 'Imprimir mapa');
+    inputs.setAttribute('data-toggle', 'tooltip');
+    inputs.setAttribute('style', 'float:right;');
+    inputs.setAttribute('onclick', 'clonDuplicadod3("' + id + '")');
+    //inputs.setAttribute('style', 'top:35px;');
+
+    let sp = document.createElement("span");
+    sp.setAttribute('class', 'inegi-imprimir');
+    sp.setAttribute('aria-hidden', 'true');
+    sp.setAttribute('style', 'font-size:18pt;');
+
+    gp.appendChild(inputs);
+    inputs.appendChild(sp);
+    row.appendChild(gp);
+
+    $('#btnImpMap').tooltip();
+
+};
+const cr_divcompara = (row,idp) => {
+    let divP= document.createElement("div");
+    divP.setAttribute("class","row"); 
+    divP.innerHTML='<div class="col-md-4"> <div class="col-md-12" style="text-align: center;"><br /> <select id="select-pais-base"><option value="0">-- Selecciona el pais base --</option> </select></div></div>'+
+    '<div class="col-md-4" style="margin-top: 50px;"><div class="col-md-12" style="text-align: center;"><br /><button id="btnCompara" type="button" onClick="calculoComapara('+idp+')" class="btn btn-default">Comparar</button></div></div>'+
+    '<div class="col-md-4"><div class="col-md-12" style="text-align: center;"><br /><select id="select-pais" multiple=""><option value="0">-- Selecciona el pais o los paises --</option></select></div></div>';
+    row.appendChild(divP);
+};
+const clicRadio = (parametrosOrig) =>{
+    let rtipo= $('input:radio[name=scaleradio'+parametrosOrig.id+']:checked').val();
+    let cont= document.getElementById(parametrosOrig.id);
+    let colorSelect = cont.getAttribute('data-colorchange');
+    parametrosOrig.estra=rtipo;
+    if(colorSelect!='' && colorSelect!=null)
+        parametrosOrig.paleta=colorSelect;
+    $('#Capa_1'+parametrosOrig.id).empty();
+    $('#estMapa_'+parametrosOrig.id).empty();
+    $('#legTitle'+parametrosOrig.id).empty();
+    switch (rtipo) {
+     case "1":
+         crearMapaTematicoD3(parametrosOrig);
+       break;
+     case "3":
+         crearMapaTematicoD3(parametrosOrig);
+       break;
+     case "4":
+         crearMapaTematicoD3(parametrosOrig);
+       break;
+       case "2":
+         crearMapaTematicoD3(parametrosOrig);
+       break;
+   }
+   setTimeout(function(){
+    paletaSelect(colorSelect,parametrosOrig);
+}, 1000);
+  
+};
+
+const configOpen = (elm) => {
+    let objelm=JSON.stringify(elm);
+        let cont= document.getElementById(elm.id);
+        let mesc =  cont.getAttribute('data-mestra');
+        let mpal =  cont.getAttribute('data-mpaleta');
+        let mcom =  cont.getAttribute('data-mcompara');
+     
+    let heightdiv;
+    if(mesc==='true'&&mpal==='true')
+        heightdiv=165;
+    else {
+        if(mesc==='true')
+            heightdiv=80;
+        if(mpal==='true')
+            heightdiv=100;
+    }
+    if (mcom){
+        heightdiv=135;
+    }
+    if (screen.width <= 460){
+        heightdiv=heightdiv+80;
+    }
+        
+
+    $('[data-toggle="tooltip"]').tooltip();
+     let widthP=contentPWidth(elm);
+    document.getElementById("contentP"+elm.id).style.width = widthP+'%';
+    document.getElementById("contentP"+elm.id).style.height = heightdiv+'px';
+    document.getElementById("contentP"+elm.id).style.border = "1px solid #ddd";
+    document.getElementById("contentP"+elm.id).style.boxShadow= "rgb(245 245 245) 4px 5px";
+    document.getElementById("contentConfig"+elm.id).style.opacity = "1";
+    let btn=document.getElementById('btnGearMap'+elm.id);
+    btn.setAttribute('onclick', 'configClose('+objelm+')');
+
+ };
+
+const configClose = (elm) => {
+    let objelm=JSON.stringify(elm);
+    document.getElementById("contentP"+elm.id).style.width = "0";
+    let btn=document.getElementById('btnGearMap'+elm.id);
+    btn.setAttribute('onclick', 'configOpen('+objelm+')');
+
+    setTimeout(function(){
+        document.getElementById("contentP"+elm.id).style.border = "1px solid transparent"; 
+        document.getElementById("contentP"+elm.id).style.boxShadow= "transparent 4px 5px";
+        document.getElementById("contentConfig"+elm.id).style.opacity = "0";
+        document.getElementById("contentP"+elm.id).style.height = '10px';
+    }, 200);
+        
+};
+
+const updateMun = (dataMun,dataEstra,elm) => {
+    try {
+        let lstMunEnt = new Array();
+        let coloresDef= new Array();
+        let paletaColores;
+        let paletSelect=document.getElementById(elm.id).getAttribute('data-colorchange');
+        if(paletSelect!=null){
+            switch (paletSelect) {
+              case "1":
+                paletaColores=paleta1;
+              break;
+              case "2":
+                paletaColores=paleta2;
+              break;
+              case "3":
+                paletaColores=paleta3;
+              break;
+              case "4":
+                paletaColores=paleta4;
+              break;
+            }
+        }
+        else{
+            paletaColores=coloresIniciales_D3;
+        }
+     for (let x = 0; x < dataMun.length; x++) {
+                lstMunEnt.push(new municpio_D3(dataMun[x].Municipio, dataMun[x].Nombre_Municipio, dataMun[x].Valores[0].Valor, '',dataMun[x].Valores[0].Periodo));
+        }
+    
+        for (let i = 0; i < dataEstra.length; i++) {
+            if (dataEstra[i].nestrato == 'extremosar'){
+                coloresDef.push(coloresIniciales_D3[11]);
+            }
+            else if (dataEstra[i].nestrato == 'extremosab'){
+                coloresDef.push(coloresIniciales_D3[10]);
+            }
+            else if  (dataEstra[i].nestrato == 'ceros'){
+                coloresDef.push(coloresIniciales_D3[9]);
+            }
+            else
+                coloresDef.push(paletaColores[dataEstra[i].nestrato-1]);
+    }
+    for (let j = 0; j < lstMunEnt.length; j++) {
+            for (let i = 0; i < dataEstra.length; i++) {
+                   if (entre_D3(dataEstra[i].limSuperior, dataEstra[i].limInferior, (lstMunEnt[j].valor).replace(/,/g, ''))) {
+                        lstMunEnt[j].estrato = dataEstra[i].nestrato;
+                        let coloInit = paletaColores[dataEstra[i].nestrato-1];
+                        if (dataEstra[i].nestrato == 'extremosar') {
+                            coloInit = coloresIniciales_D3[(11)];
+                        }
+                        if (dataEstra[i].nestrato == 'extremosab') {
+                            coloInit = coloresIniciales_D3[(10)];
+                        }
+                        if (dataEstra[i].nestrato == 'ceros'){
+                            coloInit = coloresIniciales_D3[9];
+                        }
+                        lstMunEnt[j].color = coloInit;
+                        break;
+                    }
+    
+        }
+    }
+    
+        let jsonRes = {
+            estratos: dataEstra,
+            elementos: lstMunEnt,
+            coloresMun: coloresDef
+        }
+        elm.municipiosR=jsonRes.elementos;
+        return jsonRes;
+    } catch (error) {
+        console.log("updateMun"+error);
+    }
+  
+};
+
+//para imprimir mapa y descargar xls
+const clonDuplicadod3 = (e) => {
+    let t = document.getElementById("contenedorMapaPrint");
+    t && document.body.removeChild(t);
+    let a = document.createElement("div");
+    a.setAttribute("id", "contenedorMapaPrint"), document.body.appendChild(a), mostrarHora(a), imagendiv(a), textodiv(a), nomTituloTem(e);
+    document.getElementById("mapitaClon");
+    if (document.getElementById("objMapa_" + e)) {
+        let n = document.querySelector("#objMapa_" + e+" >#Capa_1"+e).cloneNode("true");
+        n.setAttribute("id", "mapitaClon"), document.createElement("div").innerHTML = "duplicado", n.classList.add("mapClonado"), a.appendChild(n);
+
+        let i = window.location.host.match(/en.\w+[inegi.org.mx]+/gi),
+            o = document.getElementById((i ? "cont_K-means_" : "cont_K-medias_") + e);
+        if (o) o.classList.contains("active") || (o = document.getElementById("cont_Dalenius_" + e));
+        else o = document.getElementById("estMapa_" + e);
+        let d = o.cloneNode("true");
+        d.setAttribute("id", d.id + "2"), d.classList.add("tablitaClonada"), $(d).find("table").attr("id", "tblEstra_" + e + "_dalTable"), a.appendChild(d), genTable(e, false), setTimeout(function () {
+            let e = window.navigator.userAgent;
+            /Edge/.test(e) ? impIE() : window.print();
+        })
+    } else alert("Solo se puede imprimir el mapa Temático, favor de seleccionarlo.");
+};
+const genTabled3 = (e, isExport,cobertura) => {
+    let filen;
+    let t = document.getElementById("contenedorMapaPrint");
+    if (t == undefined) {
+        t = document.createElement("div");
+        t.setAttribute("id", "contenedorMapaPrint");
+        document.body.appendChild(t);
+    }
+    mapasTemObjImp = $.grep(mapasTemObj_D3, function (j) {
+        return j.id == e;
+    });
+
+
+    if (document.querySelector('#tblTemTbl')) {
+        t.removeChild(t.querySelector('#tblTemTbl'));
+    }
+    
+    
+
+    let a3 = document.createElement("table");
+    a3.setAttribute("id", "tblTemTbl", e);
+
+
+    if (isExport) {
+
+        let a = new Date,
+            n = a.getDate(),
+            i = a.getMonth() + 1,
+            o = a.getFullYear(),
+            d = a.getHours(),
+            m = a.getMinutes(),
+            s= a.getSeconds();
+
+        let trExcelPr = document.createElement("tr");
+        trExcelPr.className = "tr-excel-tr";
+        let textExcel = document.createElement("td");
+        textExcel.className = "td-excel-text";
+        textExcel.setAttribute('colspan', '3');
+        textExcel.setAttribute('style', 'font-weight: bold;font-size:12pt; font-family: Arial;');
+        textExcel.innerHTML = "Instituto Nacional de Estadística y Geografía (INEGI)";
+        trExcelPr.appendChild(textExcel);
+        a3.appendChild(trExcelPr);
+
+        let trExcelsub = document.createElement("tr");
+        trExcelsub.className = "tr-excel-tr";
+        let textExcelsub = document.createElement("td");
+        textExcelsub.className = "td-excel-text";
+        textExcelsub.setAttribute('colspan', '3');
+        textExcelsub.setAttribute('style', 'font-weight: bold;font-size:11pt;font-family: Arial;');
+        let nExcelsub = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+        if(nExcelsub)
+            textExcelsub.innerHTML = "Distribution of establishments";
+        else
+            textExcelsub.innerHTML = "Distribución de establecimientos";
+        trExcelsub.appendChild(textExcelsub);
+        //a3.appendChild(trExcelsub);
+
+        let textBan = document.createElement("tr");
+        textBan.className = "tr-excel-Ban";
+        let textBanEx = document.createElement("td");
+        if (textBanEx.className = "td-excel-ban", "00" == mapasTemObjImp[0].idEntidad) {
+            let nExcelBan = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+            if(tituloIndicadores_D3 == true){
+                textBanEx.innerHTML = nExcelBan ? "Bank Indicators" : "Banco de Indicadores";
+            }
+            else{
+                textBanEx.innerHTML = '';
+            }
+            textBanEx.setAttribute('style', 'font-weight: bold;');
+        } else
+            textBanEx.innerHTML = mapasTemObjImp[0].nombre;
+        textBanEx.setAttribute('colspan', '3');
+        textBan.appendChild(textBanEx);
+        a3.appendChild(textBan);
+
+        let textNac = document.createElement("tr");
+        textNac.className = "tr-excel-Nac";
+        let textNacEx = document.createElement("td");
+        if (textNacEx.className = "td-excel-nac", "00" == mapasTemObjImp[0].idEntidad) {
+            let nExcel = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+            textNacEx.innerHTML = nExcel ? "United Mexican States" : "Estados Unidos Mexicanos";
+            textNacEx.setAttribute('style', 'font-weight: bold;')
+        } else
+            textNacEx.innerHTML = mapasTemObjImp[0].nombre;
+        textNacEx.setAttribute('colspan', '3');
+        textNac.appendChild(textNacEx);
+        //a3.appendChild(textNac);
+
+        let titlExcel = document.createElement("tr");
+        titlExcel.className = "tr-title-ex";
+        let tiExceltd = document.createElement("td");
+        tiExceltd.className = "nom-Tit-Med";
+        let oMed = "";
+        null != mapasTemObjImp[0].unidadMedida && "" != mapasTemObjImp[0].unidadMedida && (oMed = " (" + mapasTemObjImp[0].unidadMedida + "), ");
+        let dMed = "";
+        null != mapasTemObjImp[0].titulo && (dMed = mapasTemObjImp[0].titulo);
+        let mUni = "";
+        null != mapasTemObjImp[0].periodo && (mUni = " " + mapasTemObjImp[0].periodo), tiExceltd.innerHTML = dMed + oMed + mUni;
+        tiExceltd.setAttribute('colspan', '3'),
+        tiExceltd.setAttribute('style', 'font-weight: bold;');
+        titlExcel.appendChild(tiExceltd);
+        if(dMed=='')
+            a3.appendChild(textExcelsub);
+        else
+            a3.appendChild(titlExcel);
+
+        let trExcelPr2 = document.createElement("tr");
+        trExcelPr2.className = "tr-excel-tr";
+        let horsExcel = document.createElement("td");
+        let nExcelhors = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+        horsExcel.className = "td-excel-text";
+        horsExcel.setAttribute('colspan', '3');
+        horsExcel.setAttribute('style', 'font-size:9pt;font-family: Arial;');
+        if(nExcelhors)
+            horsExcel.innerHTML = "Date: "+ n + "/" + i + "/" + o + " -" + d + ":" + m;
+        else
+            horsExcel.innerHTML = "Fecha de consulta: "+ n + "/" + i + "/" + o + " -" + d + ":" + m;
+        filen='mapa'+o+i+n+d+m+s;
+        trExcelPr2.appendChild(horsExcel);
+        a3.appendChild(trExcelPr2);
+
+    }
+
+
+    let n = document.createElement("thead");
+    n.className = "tTemTbl", a3.appendChild(n);
+    let i = document.createElement("tr");
+    i.className = "tr-color-tr";
+    let o = document.createElement("td");
+    o.className = "td-Nombre-td";
+    o.setAttribute('style', 'font-weight: bold;background-color:#c8c8c8;border: 1px solid black;font-size:10pt;font-family: Arial;');
+    o.innerText="Estrato";
+    let d = document.createElement("td");
+    d.setAttribute('style', 'font-weight: bold;background-color:#c8c8c8;border: 1px solid black;font-size:10pt;font-family: Arial;');
+    if (d.className = "td-Nombre-td", "00" == mapasTemObjImp[0].idEntidad) {
+        let m = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+        if(cobertura=='est'){
+            d.innerText = m ? "Geographic Region" : "Entidad federativa";
+        }
+         else if(cobertura==='mun'){
+            d.innerText = m ? "Geographic Region" : "Región geográfica";
+        }
+         else{
+            d.innerText = m ? "Country" : "País";
+         }
+    } else {
+        m = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+        d.innerText = m ? "Geographic Region" : "Municipios"
+    }
+    let r = document.createElement("td");
+    r.className = "td-Valor-td";
+    r.setAttribute('style', 'font-weight: bold;background-color:#c8c8c8;border: 1px solid black;font-size:10pt;font-family: Arial;');
+    m = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+    r.innerText = m ? "Value" : "Valor", i.appendChild(o), i.appendChild(d), i.appendChild(r), n.appendChild(i);
+    let l = document.createElement("tbody");
+    a3.appendChild(l);
+    for (let c = 0; c < mapasTemObjImp[0].municipios.length; c++) {
+        let p = document.createElement("tr"),
+            s = document.createElement("td"),
+            u = document.createElement("td"),
+            g = document.createElement("td");
+        s.setAttribute("style", "border: 1px solid black; background-color: " + mapasTemObjImp[0].municipios[c].color + " !important;"), u.className = "mt-txt-align-l", u.innerText = mapasTemObjImp[0].municipios[c].nombre, u.setAttribute("style", "padding-left: 1em !important;border: 1px solid black;"), g.setAttribute('style', 'border: 1px solid black;'),g.className = "mt-txt-align-r", g.innerText = mapasTemObjImp[0].municipios[c].valor, l.appendChild(p), p.appendChild(s), p.appendChild(u), p.appendChild(g);
+    }
+    for (let c = 0; c < mapasTemObjImp[0].municipiosR.length; c++) {
+        let p = document.createElement("tr"),
+            s = document.createElement("td"),
+            u = document.createElement("td"),
+            g = document.createElement("td");
+        s.setAttribute("style", "border: 1px solid black; background-color: " + mapasTemObjImp[0].municipiosR[c].color + " !important;"), u.className = "mt-txt-align-l", u.innerText = mapasTemObjImp[0].municipiosR[c].nombre, u.setAttribute("style", "padding-left: 1em !important;border: 1px solid black;"), g.setAttribute('style', 'border: 1px solid black;'),g.className = "mt-txt-align-r", g.innerText = mapasTemObjImp[0].municipiosR[c].valor, l.appendChild(p), p.appendChild(s), p.appendChild(u), p.appendChild(g);
+    }
+    let nExcelfue = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+    let trExcelf = document.createElement("tr");
+    let textoFuente="Fuente: ";
+    if(mapasTemObjImp[0].fuentes.length!=0){
+      for(let fs=0; fs<mapasTemObjImp[0].fuentes.length;fs++){
+          if(fs==0)
+            textoFuente=textoFuente+mapasTemObjImp[0].fuentes[fs].nombreFuente;
+            else{
+               if(mapasTemObjImp[0].fuentes[fs].nombreFuente!=mapasTemObjImp[0].fuentes[fs-1].nombreFuente)
+                textoFuente=textoFuente+'</br>'+mapasTemObjImp[0].fuentes[fs].nombreFuente;}
+      }
+    }
+    else{
+        if(nExcelfue)
+        textoFuente = "INEGI. Directorio Estadístico Nacional de Unidades Económicas";
+    else
+        textoFuente = "INEGI. Directorio Estadístico Nacional de Unidades Económicas";
+        
+    }
+    trExcelfclassName = "tr-excel-tr";
+    let fExcel = document.createElement("td");
+    fExcel.className = "td-excel-hors";
+    fExcel.setAttribute('colspan', '3');
+    fExcel.innerHTML = textoFuente;
+    trExcelf.appendChild(fExcel);
+    a3.appendChild(trExcelf);
+  
+    t.appendChild(a3);
+    if (isExport) {
+        tablesToExceld3('tblTemTbl',filen,e,cobertura);
+    }
+}
+const tablesToExceld3 = (idtb, e,id,cobertura) => {
+    esperaExceld3(idtb, e);
+    document.querySelector("#objMapa_" + id+ ">#Capa_1"+id).style.height = '500px';
+    if(cobertura!='pais')
+         $("#estMapa_"+ id ).height(150);
+};
+const esperaExceld3 = (idtb, e) => {
+    let exportador = {
+        _fallbacktoCSV: true,
+        toXLS: function toExcel(tableId, filename) {
+            this._filename = (typeof filename == 'undefined') ? tableId : filename;
+            //let ieVersion = this._getMsieVersion();
+            //Fallback to CSV for IE & Edge
+            if ((this._getMsieVersion() || this._isFirefox()) && this._fallbacktoCSV) {
+                console.log('Explorer o Mozilla');
+                return this.toCSV(tableId);
+            } else if (this._getMsieVersion() || this._isFirefox()) {
+                alert("Not supported browser");
+            }
+            //Other Browser can download xls
+            let htmltable = document.getElementById(tableId);
+            let html = htmltable.outerHTML;
+        },
+        toCSV: function (tableId, filename) {
+            this._filename = (typeof filename === 'undefined') ? tableId : filename;
+            // Generate our CSV string from out HTML Table
+            let csv = html;
+            // Create a CSV Blob
+            let blob = new Blob([csv], { type: "data:application/vnd.ms-excel" });
+            // Determine which approach to take for the download
+            // Works for Internet Explorer and Microsoft Edge
+            if (navigator.msSaveOrOpenBlob) {
+                navigator.msSaveOrOpenBlob(blob, this._filename + ".xls");
+            } else {
+                this._downloadAnchor(URL.createObjectURL(blob), 'xls');
+            }
+        },
+        _getMsieVersion: function () {
+            let ua = window.navigator.userAgent;
+            let msie = ua.indexOf("MSIE ");
+            if (msie > 0) {
+                // IE 10 or older => return version number
+                return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)), 10);
+            }
+            let trident = ua.indexOf("Trident/");
+            if (trident > 0) {
+                // IE 11 => return version number
+                let rv = ua.indexOf("rv:");
+                return parseInt(ua.substring(rv + 3, ua.indexOf(".", rv)), 10);
+            }
+            let edge = ua.indexOf("Edge/");
+            if (edge > 0) {
+                // Edge (IE 12+) => return version number
+                return parseInt(ua.substring(edge + 5, ua.indexOf(".", edge)), 10);
+            }
+            // other browser
+            return false;
+        },
+        _isFirefox: function () {
+            if (navigator.userAgent.indexOf("Firefox") > 0) {
+                return 1;
+            }
+            return 0;
+        },
+        _downloadAnchor: function (content, ext) {
+            let anchor = document.createElement("a");
+            anchor.style = "display:none !important";
+            anchor.id = "downloadanchor";
+            document.body.appendChild(anchor);
+            // If the [download] attribute is supported, try to use it
+            if ("download" in anchor) {
+                anchor.download = this._filename + "." + ext;
+            }
+            anchor.href = content;
+            anchor.click();
+            anchor.remove();
+        },
+        _tableToCSV: function (table) {
+            // We'll be co-opting `slice` to create arrays
+            let slice = Array.prototype.slice;
+            return table;
+        }
+    };
+
+    let tab_text = document.getElementById(idtb);
+    let ua = window.navigator.userAgent;
+    let msie = ua.indexOf("MSIE ");
+    console.log('tab_text');
+
+    let html = tab_text.outerHTML;
+    while (html.indexOf('á') != -1) html = html.replace('á', '&aacute;');
+    while (html.indexOf('Á') != -1) html = html.replace('Á', '&Aacute;');
+    while (html.indexOf('é') != -1) html = html.replace('é', '&eacute;');
+    while (html.indexOf('É') != -1) html = html.replace('É', '&Eacute;');
+    while (html.indexOf('í') != -1) html = html.replace('í', '&iacute;');
+    while (html.indexOf('Í') != -1) html = html.replace('Í', '&Iacute;');
+    while (html.indexOf('ó') != -1) html = html.replace('ó', '&oacute;');
+    while (html.indexOf('Ó') != -1) html = html.replace('Ó', '&Oacute;');
+    while (html.indexOf('ú') != -1) html = html.replace('ú', '&uacute;');
+    while (html.indexOf('Ú') != -1) html = html.replace('Ú', '&Uacute;');
+    while (html.indexOf('º') != -1) html = html.replace('º', '&ordm;');
+    while (html.indexOf('ñ') != -1) html = html.replace('ñ', '&ntilde;');
+    while (html.indexOf('Ñ') != -1) html = html.replace('Ñ', '&Ntilde;');
+    tab_text.innerHTML = html;
+
+    let link = document.getElementById('link');
+    
+    link.href='data:application/vnd.ms-excel,' + encodeURIComponent(html);
+    link.download=e;
+    link.click();
+    if ((exportador._getMsieVersion() || exportador._isFirefox()) && exportador._fallbacktoCSV) {
+        console.log('Explorer o Mozilla');
+        //exportador.toCSV(html, 'SVG');
+
+    }
+    else                 //other browser not tested on IE 11
+    {
+       // window.open('data:application/vnd.ms-excel,' + encodeURIComponent(html));
+
+    }
+
+};
+
+const contentPWidth = (elm) => {
+    let cont= document.getElementById(elm.id);
+    let mesc =  cont.getAttribute('data-mestra');
+    let mpal =  cont.getAttribute('data-mpaleta');
+    let mimp = cont.getAttribute('data-mimpr');
+
+     
+    const totalWidth=$('#'+elm.id).width();
+    let espaciobtn=0;
+    let calculoPor=0;
+
+    if(mimp==='true')
+        espaciobtn=espaciobtn+$('#btngImp').width();
+    if(mesc==='true' || mpal==='true')
+        espaciobtn=espaciobtn+$('#divGear'+elm.id).width();
+    if(elm.periodoM )
+        espaciobtn=espaciobtn+$('#spanPer_'+elm.id).width()+10;
+
+    calculoPor=(espaciobtn*100)/totalWidth;
+    return (100-calculoPor)-1;
+};
+
+
+
+//get y set
+const getAgeo_D3 = (obj) => {
+    let ag = obj.getAttribute('data-ageo');
+    //let ag = $(obj).data('ageo');//$(obj).attr('data-ageo');
+    if (ag !== undefined)
+        return ag;
+    else
+        return '00';
+};
+const getOportuno_D3 = (obj) => {
+    let op = obj.getAttribute('data-oportuno');
+    if (op !== undefined && op !==null)
+        return op;
+    else
+        return 1;
+};
+const getTipoEstrat_D3 = (obj) => {
+    let op = obj.getAttribute('data-tipoestratos');
+    if (op !== undefined)
+        return op;
+    else
+        return 1;
+};
+const getIndicador_D3 = (obj) => {
+    let ind = obj.getAttribute('data-indicador');
+    if (ind !== undefined)
+        return ind;
+    else
+        return '';
+};
+const getTitulo_D3 = (obj) => {
+    let tit = obj.getAttribute('data-titulo');
+    if (tit !== undefined && tit !==null)
+        return tit;
+    else
+        return '';
+};
+const getTotal_D3 = (obj) => {
+    let tot = obj.getAttribute('data-total');
+    if (tot !== undefined && tot !==null)
+        return tot;
+    else
+        return '';
+};
+const getPeriodo_D3 = (obj) => {
+    let per = obj.getAttribute('data-periodo');
+    if (per !== undefined && per !==null)
+        return per;
+    else
+        return '';
+};
+const getAnio_D3 = (obj) => {
+    let anio = obj.getAttribute('data-anio');
+    if (anio !== undefined)
+        return anio;
+    else
+        return '';
+};
+const setUnidadM_D3 = (obj) => {
+    let UnidadM = $(obj).data('setUnidadM_D3');
+    if (UnidadM !== undefined)
+        return UnidadM;
+    else
+        return true;
+};
+const setValorM_D3 = (obj) => {
+    let ValorM = $(obj).data('setValorM_D3');
+    if (ValorM !== undefined)
+        return ValorM;
+    else
+        return true;
+};
+const setPeriodoM_D3 = (obj) => {
+    let PeriodoM = $(obj).data('setPeriodoM_D3');
+    if (PeriodoM !== undefined)
+        return PeriodoM;
+    else
+        return true;
+};
+const setFuentesM_D3 = (obj) => {
+    let FuentesM = $(obj).data('setFuentesM_D3');
+    if (FuentesM !== undefined)
+        return FuentesM;
+    else
+        return true;
+};
+const setNotasM_D3 = (obj) => {
+    let NotasM = $(obj).data('NotasM');
+    if (NotasM !== undefined)
+        return NotasM;
+    else
+        return true;
+};
+
+
+

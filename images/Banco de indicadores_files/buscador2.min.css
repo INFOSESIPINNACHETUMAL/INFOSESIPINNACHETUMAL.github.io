@@ -1,0 +1,3765 @@
+
+.containerTab {
+    /*width: 80vmin;*/
+    width: 100%;
+    position: inherit;
+    /* transform: translateX(-34%);
+    left: 24%;*/
+    background-color: #ffffff;
+    /*box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);*/
+}
+
+body {
+    font-family: Arial;
+}
+
+.tab {
+    overflow: hidden;
+    /*border: 1px solid #ccc;
+ background-color: #f1f1f1;*/
+}
+
+    /* Style the buttons inside the tab */
+    .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        /*font-size: 17px;*/
+    }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+
+
+/* SCROLL CONTAINER */
+.scroll-container-buscador {
+    overflow: scroll;
+    height: 160px;
+    width: auto;
+    overflow-x: hidden;
+}
+
+    .scroll-container-buscador::-webkit-scrollbar {
+        width: 5px;
+    }
+    /* Track */
+    .scroll-container-buscador::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    /* Handle */
+    .scroll-container-buscador::-webkit-scrollbar-thumb {
+        background: #d6d0d0;
+    }
+        /* Handle on hover */
+        .scroll-container-buscador::-webkit-scrollbar-thumb:hover {
+            background: rgb(160, 139, 139);
+        }
+
+
+
+
+
+
+
+
+
+
+.modal-open {
+    overflow: hidden;
+}
+
+/*Container that the modal scrolls within*/
+.modal-Buscador {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    outline: 0;
+}
+/*// se configura el tamaño y la posicion del modal*/
+.modal-dialog-Buscador {
+    position: relative;
+    width: 485px;
+    margin: 7.75rem auto;
+    /*pointer-events: none;*/ /*afecta a mariel*/
+}
+
+    .modal-dialog-Buscador .modal.fade {
+        -webkit-transform: translate(0, -25%);
+        transform: none;
+    }
+
+    .modal-dialog-Buscador .modal.show .in {
+        -webkit-transform: translate(0, -25%);
+    }
+
+    .modal-dialog-Buscador .modal.modal-static {
+        transform: none
+    }
+
+.modal-dialog-scrollable-Buscador {
+    display: flex; /*IE10/11*/
+    max-height: calc(100% - 1rem);
+}
+
+    .modal-dialog-scrollable-Buscador
+    .modal-content-Buscador {
+        max-height: calc(100vh - 1rem);
+        overflow: hidden;
+    }
+
+    .modal-dialog-scrollable-Buscador
+    .modal-header-Buscador,
+    .modal-footer {
+        flex-shrink: 0;
+    }
+
+    .modal-dialog-scrollable-Buscador
+    .modal-body-Buscador {
+        overflow-y: auto;
+        height: 500px;
+    }
+
+
+
+/*// Actual modal*/
+.modal-content-Buscador {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 402px;
+    /*color: $modal-content-color;*/
+    pointer-events: auto;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 0.3rem;
+    outline: 0;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    /*z-index: 1040;*/
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+}
+
+    .modal-backdrop.fade {
+        /* opacity: 0;*/
+    }
+
+    .modal-backdrop.show {
+        opacity: .5;
+    }
+
+.modal-header-Buscador {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: calc(0.3rem - 1px);
+    border-top-right-radius: calc(0.3rem - 1px);
+}
+
+.modal-header.close {
+    padding: 1rem 1rem;
+    margin: -1rem -1rem -1rem auto;
+}
+
+.modal-body-Buscador {
+    position: relative;
+    /*flex: 1 1 auto;*/
+    padding: 1rem;
+}
+
+.modal-scrollbar-measure {
+    position: absolute;
+    top: -9999px;
+    width: 50px;
+    height: 50px;
+    overflow: scroll;
+}
+
+@media screen and (min-width: 412px) and (max-width: 915px) {
+    .modal-dialog {
+        width: 400px;
+    }
+}
+
+@media screen and (min-width: 280px) and (max-width: 653px) {
+    .modal-dialog {
+        width: 245px;
+    }
+}
+
+@media screen and (min-width: 500px) and (max-width: 653px) {
+    .modal-dialog {
+        width: 450px;
+    }
+}
+
+.claseTachaBuscador {
+    margin: -25px 0 0 290px !important;
+}
+
+.claseBuscarLogo {
+    margin: -28px 0 0 101px !important;
+}
+
+#tachaBuscador {
+    color: #333;
+}
+
+button:focus,
+button:hover,
+input:focus,
+input:hover {
+    outline: 2px solid black;
+}
+
+input:focus,
+input:hover {
+    background-color: #eee;
+}
+
+.clasereuslt {
+    /*margin-top: 50px !important;*/
+    margin-top: 50px;
+}
+
+#marcoPrincipal {
+    margin-bottom: 120px;
+}
+
+#idOrdenar {
+    height: 1px;
+}
+
+#PalabrasRelacionadas {
+    font-family: arial,sans-serif !important;
+    font-size: 20px !important;
+    font-weight: bold;
+    /*color: #70787c !important;*/
+}
+
+#BuscadorOrdenador {
+    padding-top: 15px !important;
+}
+
+#labelPestana {
+    padding-top: 9px !important;
+    width: 30% !important;
+}
+
+#labelPestana2 {
+    padding-top: 9px !important;
+}
+
+#coleccionesCombo {
+    padding-left: 5px !important;
+}
+
+#coleccionesOrder {
+    padding-left: 5px !important;
+}
+
+#idBuscador {
+    padding-left: 5px !important;
+}
+
+#rowbuscador {
+    padding-top: 9px !important;
+}
+
+
+#tabla_relacionadas {
+    table-layout: fixed !important;
+}
+
+.topbutton {
+    margin-top: 20px;
+    /*margin-bottom: 15px;*/
+}
+
+.clasetrtd {
+    width: 100% !important;
+    word-wrap: break-word;
+    flex-wrap: wrap;
+}
+
+.formato_fecha {
+    font-size: 12px !important;
+    color: #70787C !important;
+}
+
+.bie_indicador {
+    font-weight: bold !important;
+}
+
+loading div.slp-tbl_buscador.slp-marginTB {
+    width: 100%;
+}
+
+div.slp-tbl_buscador.slp-marginTB:first-child {
+    padding-top: 5px;
+}
+
+.highlight {
+    background-color: #FFFF88 !important;
+    padding: 0px !important;
+    margin-bottom: 0px !important;
+    border: 0px !important;
+    border-radius: 0px !important;
+}
+
+#sugerencia {
+    color: #dd4b39;
+}
+
+.slp-marginTB {
+    margin: 10px 0;
+}
+
+#valorsugerencias {
+    color: #1a0dab;
+}
+
+.resaltarTexto {
+    color: #F3AA04;
+    background-color: #FFFF96;
+}
+
+.slp-tbl_buscador {
+    display: table;
+}
+
+.slp-tbl-col_buscador {
+    display: table-cell
+}
+
+.slp-tbl-row_buscador {
+    display: table-row
+}
+
+.highcharts-container {
+    width: 100% !important;
+}
+
+.classDiv {
+    background: transparent;
+    width: 100%;
+    height: auto;
+}
+
+.tfiltro {
+    color: black !important;
+    font-weight: bold;
+    background-color: #90b5d5 !important;
+}
+
+.aFiltro {
+    color: black !important;
+    font-weight: normal !important;
+    display: inline-table;
+}
+
+    .aFiltro:hover {
+        color: #2279c0 !important;
+    }
+
+.lblF {
+    font-size: 15px !important;
+    font-weight: normal !important;
+    cursor: pointer !important;
+    padding-left: 5px;
+}
+
+.panel-title {
+    padding: 0;
+    background-color: transparent;
+    margin-left: -4px;
+    font-size: 15px;
+}
+
+    .panel-title a:hover, .panel-title a:active, .panel-title a:focus {
+        text-decoration: none;
+    }
+
+.up {
+    margin-top: 0px !important;
+}
+
+.oculta {
+    display: none !important;
+}
+
+.onlyOne {
+    display: none !important;
+}
+
+.select, .select2 {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    overflow: hidden;
+}
+/* Dispositivos grandes (ordenadores, anchura mayor   1200px) */
+@media screen and (min-width: 1200px) {
+    .claseTachaBuscador {
+        margin: -25px 0 0 189px !important;
+    }
+
+    .clasereuslt {
+        margin-top: 80px;
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    #selectOrder {
+        width: 110%;
+    }
+
+    #comboOrder {
+        position: absolute;
+        padding-left: 65px;
+    }
+
+    #row_ayuda {
+        width: 100% !important;
+    }
+
+    #principalinfo {
+        right: 75px !important;
+    }
+
+    #informacionPrincipales {
+        width: 200px !important;
+        float: right !important;
+    }
+
+    #clasbancos {
+        margin-top: -25px !important;
+        margin-left: 55px !important;
+    }
+
+    .todoresulttam {
+        /*margin-top: 95px !important;*/
+        margin-top: 140px !important;
+    }
+
+    .inglescomboTamanop {
+        left: 27px !important;
+    }
+
+    .inglesorderAscdesc {
+        left: 30px !important;
+    }
+
+    #idBuscador {
+        right: 3% !important;
+    }
+
+    #idOrdenar {
+        right: 7% !important;
+    }
+
+    #comboTamanop {
+        padding-right: 0px !important;
+        width: 75% !important;
+        padding-left: 5px !important;
+    }
+
+    #orderAscdesc {
+        padding-left: 0px !important;
+    }
+
+    .alineacionTexto {
+        position: absolute;
+        top: 120px;
+    }
+
+    .tamanoalineacionTexto {
+        height: 0px;
+    }
+
+    .alineacioncombos {
+        position: absolute;
+        top: 99px;
+        height: 0 !important;
+    }
+
+    .tamanoalineacioncombos {
+        height: 0 !important;
+    }
+
+    #comboPestana {
+        padding-left: 0px;
+        margin-top: 2px;
+    }
+
+    #rowordenar {
+        top: 8px !important;
+    }
+
+
+    #bancos {
+        top: 8px !important;
+    }
+
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -25px 0 0 255px !important;
+        }
+    }
+
+    .publitema {
+        width: 110% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    #row_ayuda {
+        width: 1140px;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+    }
+
+    a[id*="nivel_tag"] {
+        text-align: right !important;
+    }
+
+    .nivel_peso {
+        text-align: right !important;
+        left: 10px !important;
+    }
+
+    .nivel_imagen {
+        padding-left: 15px !important;
+    }
+}
+/* Dispositivos grandes (ordenadores, anchura mayor o igual a 1200px) */
+@media screen and (min-width: 993px) and (max-width: 1199px) {
+    #row_ayuda {
+        width: 100% !important;
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    .claseTachaBuscador {
+        margin: -25px 0 0 189px !important;
+    }
+
+    .principalArchivo {
+        width: 100px !important;
+    }
+
+    #principalinfo {
+        right: 65px !important;
+    }
+
+    #informacionPrincipales {
+        /*width: 1105px !important;*/
+        width: 200px !important;
+        float: right !important;
+    }
+
+    #clasbancos {
+        margin-top: -25px !important;
+        margin-left: 50px !important;
+    }
+
+    .todoresulttam {
+        margin-top: 95px !important;
+    }
+
+    .inglescomboTamanop {
+        left: 30px !important;
+    }
+
+    .inglesorderAscdesc {
+        left: 40px !important;
+    }
+
+    #idBuscador {
+        right: 3% !important;
+    }
+
+    #idOrdenar {
+        right: 7% !important;
+    }
+
+    .alineacionTexto {
+        position: absolute;
+        top: 130px;
+    }
+
+    #rowordenar {
+        top: 8px !important;
+    }
+
+    .tamanoalineacionTexto {
+        height: 0px;
+    }
+
+    #comboPestana {
+        padding-left: 12px !important;
+        margin-top: 2px;
+        width: 100%;
+    }
+
+    #comboOrder {
+        width: 100%;
+    }
+
+    #comboTamanop {
+        padding-right: 0px !important;
+        width: 75% !important;
+        padding-left: 5px !important;
+    }
+
+    #buscara {
+        width: 78% !important;
+    }
+
+    #rowbuscador {
+        width: 22% !important;
+    }
+
+    .nivel_peso {
+        text-align: right !important;
+        padding-right: 0px !important;
+        left: 10px !important;
+    }
+
+    .nivel_peso1 {
+        padding-right: 0px !important;
+    }
+
+    .nivel_imagen {
+        padding-left: 15px !important;
+    }
+
+    #orderAscdesc {
+        left: 11px;
+        padding-left: 3px !important;
+    }
+
+    /*#todo_buscar {
+        left: 350px !important;
+    }*/
+
+    #todo_ordenar {
+        left: 300px !important;
+    }
+
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 205px !important;
+        }
+    }
+
+    .publitema {
+        width: 115% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    #labelBI {
+        padding-right: 0px !important;
+    }
+
+    #row_ayuda {
+        width: 950px;
+    }
+
+    #ordena_todo, #buscaPor {
+        float: none !important;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+        /* width: 140px !important;*/
+    }
+
+    #ordenatodo {
+        padding-left: 15px !important;
+    }
+
+    #radio2 {
+        float: left !important;
+    }
+
+    .esp, .esp2 {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .divMedia {
+        display: block !important;
+        line-height: 20px !important;
+    }
+
+    #buscaen {
+        padding-left: 10px !important;
+    }
+
+    #resupaginacion {
+        text-align: left !important;
+    }
+
+    #busen {
+        padding-left: 12px !important;
+        padding-top: 0px !important;
+        text-align: left !important;
+    }
+
+    #rowtodobusca {
+        padding-left: 0px !important;
+    }
+
+    #rowinput {
+        margin-bottom: 0px !important;
+    }
+
+    #todobuscaen {
+        padding-left: 0px !important;
+    }
+
+    #rowordenar {
+        text-align: left !important;
+        padding-left: 5px !important;
+        padding-right: 0px !important;
+    }
+
+    #todorowordenar {
+        padding-left: 35px !important;
+    }
+
+    #clasordn {
+        margin-left: 0px;
+        width: 220px !important;
+    }
+}
+/* Dispositivos medianos (ordenadores, anchura mayor o igual a 992px) */
+@media screen and (min-width: 768px) and (max-width: 993px) {
+    .claseTachaBuscador {
+        margin: -25px 0 0 290px !important;
+    }
+
+    .claseBuscarLogo {
+        left: 300px !important;
+    }
+
+    #row_ayuda {
+        width: 100% !important;
+    }
+
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+
+    #principalinfo {
+        right: 60px !important;
+    }
+
+    #informacionPrincipales {
+        /*width: 1105px !important;*/
+        width: 190px !important;
+        float: right !important;
+    }
+
+    #principa_bancos {
+        margin-top: 0px !important;
+        margin-left: -35px !important;
+    }
+
+    .searchresults {
+        top: 0px !important;
+    }
+
+    .slp-marginSL {
+        margin-left: 0 !important;
+    }
+
+    .todoClasTam {
+        margin-top: -22px;
+    }
+
+    #noResultados {
+        top: 0px !important;
+    }
+
+    .noResultadostamano {
+        margin-top: -50px !important;
+    }
+
+    #ordenaren {
+        padding-left: 0px !important;
+    }
+
+    #todoroworden {
+        top: 10px !important;
+    }
+
+    #inputtodo {
+        top: 18px !important;
+    }
+
+    #comboPestana {
+        width: 100%;
+    }
+
+    .nivel_peso {
+        text-align: right !important;
+        padding-right: 0px !important;
+        left: 10px !important;
+    }
+
+    .nivel_peso1 {
+        margin-right: 0px;
+        border-left-width: 10px;
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-left: 10px;
+    }
+
+    #orderAscdesc {
+        left: 9px !important;
+        padding-left: 0px;
+        width: 2%;
+    }
+
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 212px !important;
+        }
+    }
+
+    .publitema {
+        width: 125% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px !important;
+    }
+
+    .noticias_peso {
+        padding-left: 40px !important;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+        width: 140px !important;
+    }
+
+    #clasbancos {
+        padding-right: 0px !important;
+        width: 310px !important;
+    }
+
+    #row_ayuda {
+        width: 805px;
+    }
+
+    .text_definicion {
+        text-align: left !important;
+    }
+
+    .text_programa {
+        text-align: left !important;
+        padding-left: 0px !important;
+    }
+
+    #ordena_todo, #buscaPor {
+        float: none !important;
+    }
+
+    #buscaen {
+        padding-left: 10px !important;
+    }
+
+    #buscaren {
+        padding-left: 5px !important;
+    }
+
+    #comboTamanop {
+        padding-left: 5px !important;
+        padding-right: 0px !important;
+        width: 97% !important;
+    }
+
+    #buscara {
+        /*padding-right: 15px !important;
+        padding-left: 15px !important;*/
+        width: 100% !important;
+    }
+
+    /* #clasordn {
+        padding-left: 0px !important;
+        margin-left: 0px !important;
+        width: 95% !important;
+    }*/
+
+    #radio2 {
+        float: left !important;
+    }
+
+    .esp, .esp2 {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .divMedia {
+        display: block !important;
+        line-height: 20px !important;
+    }
+
+    #busen {
+        padding-left: 10px !important;
+        padding-top: 0px !important;
+        text-align: left !important;
+    }
+
+    #rowtodobusca, #todobuscaen {
+        padding-left: 0px !important;
+    }
+
+    #rowinput {
+        margin-bottom: 0px !important;
+    }
+
+    #rowordenar {
+        text-align: left !important;
+        padding-left: 5px !important;
+    }
+
+    #todoroworder {
+        padding-left: 0px !important;
+    }
+
+    #todorowordenar, #ordenatodo {
+        padding-left: 15px !important;
+    }
+
+    #rowbuscador {
+        padding-left: 10px !important;
+    }
+}
+/* Dispositivos pequeños (tablets, anchura mayor o igual a 768px) */
+@media screen and (min-width: 501px) and (max-width: 767px) {
+    #row_ayuda {
+        width: 100% !important;
+    }
+
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+
+    #informacionEncontrados {
+        font-size: 12px !important;
+    }
+
+    .secundarioTooltip {
+        padding-left: 15px !important;
+    }
+
+    #principalinfo {
+        right: -25px !important;
+    }
+
+    #informacionPrincipales {
+        /*width: 1105px !important;*/
+        width: 190px !important;
+        float: right !important;
+    }
+
+    #principa_bancos {
+        margin-top: 0px !important;
+        margin-left: -35px !important;
+    }
+
+    .searchresults {
+        top: 0px !important;
+    }
+
+    .slp-marginSL {
+        margin-left: 0 !important;
+    }
+
+    .todoClasTam {
+        margin-top: -22px;
+    }
+
+    #noResultados {
+        top: 0px !important;
+    }
+
+    .noResultadostamano {
+        margin-top: -50px !important;
+    }
+
+    #comboTamanop {
+        padding-right: 0px !important;
+        width: 95% !important;
+    }
+
+    #orderAscdesc {
+        left: 9px !important;
+        padding-left: 0px;
+        width: 2%;
+    }
+
+    .columnaresponsuva {
+        font-size: 10px;
+        word-wrap: break-word;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    #tabla_relacionadas {
+        width: 100% !important;
+    }
+    /* #comboPestana {
+        padding-left: 35px !important;
+    }*/
+    .col-xs-2 {
+        width: 11% !important;
+    }
+
+    .col-xs-10 {
+        width: 89% !important;
+    }
+    /* #comboPestana {
+        padding-right: 0px !important;
+    }*/
+    #todoroworden {
+        top: 10px !important;
+    }
+
+    #inputtodo {
+        top: 18px !important;
+    }
+
+    .nivel_peso {
+        text-align: right !important;
+        padding-right: 0px !important;
+        left: 5px !important;
+    }
+
+    .nivel_peso1 {
+        text-align: right !important;
+        padding-right: 0px !important;
+        left: 5px !important;
+    }
+
+    .nivel_peso2 {
+        text-align: right !important;
+    }
+
+    .nivel_imagen {
+        padding-left: 15px !important;
+    }
+
+    .publitema {
+        width: 114% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px !important;
+    }
+
+    .respo_tabulado {
+        padding-left: 15px !important;
+    }
+
+    .respo_tabulado1 {
+        padding-left: 30px !important;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+    }
+
+    #clasbancos {
+        padding-right: 0px !important;
+        width: 310px !important;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    .text_definicion {
+        text-align: left !important;
+    }
+
+    .text_programa {
+        text-align: left !important;
+        padding-left: 0px !important;
+    }
+
+    #buscaren, #ordenaren {
+        float: left !important;
+    }
+
+    #todoroworder, #buscaren {
+        padding-left: 0px !important;
+    }
+
+    #clasordn {
+        width: 100% !important;
+    }
+
+    #comboTamanop {
+        padding-left: 5px !important;
+    }
+
+    #rowordenar {
+        padding-top: 0px !important;
+    }
+
+    /* #rowbuscador {
+        padding-left: 0px !important;
+    }*/
+
+    #buscaren {
+        padding-right: 10px !important;
+        padding-top: 20px !important;
+    }
+
+    #ordenaren {
+        padding-right: 10px !important;
+        padding-top: 15px !important;
+    }
+
+    #todo_buscar {
+        margin-top: 0px !important;
+    }
+
+    #busen {
+        padding-top: 0px !important;
+    }
+
+    a[id*="snippet_row-tag-"] {
+        float: right !important;
+    }
+}
+
+@media screen and (min-width: 570px) and (max-width: 767px) {
+    #row_ayuda {
+        width: 100% !important;
+    }
+
+    #buscara {
+        width: 100% !important;
+    }
+
+    #resultados {
+        left: 52px;
+        padding-right: 0px;
+    }
+
+    .claseBuscarLogo {
+        left: 300px !important;
+    }
+}
+
+@media screen and (min-width: 552px) and (max-width: 569px) {
+    /* #informacionEncontrados {
+        font-size: 12px !important;
+    }*/
+    /*#comboPestana {
+        padding-left: 35px !important;
+    }*/
+
+    #resultados {
+        left: 35px;
+        padding-right: 0px;
+    }
+
+    .claseBuscarLogo {
+        left: 300px !important;
+    }
+}
+
+@media screen and (min-width: 501px) and (max-width: 551px) {
+    /* #informacionEncontrados {
+        font-size: 12px !important;
+    }*/
+    /* #comboPestana {
+        padding-left: 35px !important;
+    }*/
+    #resul_encontra {
+        width: 100% !important;
+    }
+
+    #resultados {
+        left: 10px;
+        padding-right: 0px;
+    }
+
+    .claseBuscarLogo {
+        left: 300px !important;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    #row_ayuda {
+        width: 110% !important;
+    }
+}
+/* Dispositivos muy pequeños (teléfonos de hasta 768px de anchura) */
+@media screen and (max-width: 500px) {
+    .claseBuscarLogo {
+        left: 300px !important;
+    }
+    /* #encBuscarLogo {
+        left: 310px !important;
+    }*/
+
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+
+    .secundarioTooltip {
+        padding-left: 15px !important;
+        width: 0px !important;
+    }
+
+    #principalinfo {
+        right: -25px !important;
+    }
+
+    #informacionPrincipales {
+        /*width: 1105px !important;*/
+        width: 190px !important;
+        float: right !important;
+    }
+
+    #principa_bancos {
+        margin-top: 0px !important;
+        margin-left: -35px !important;
+    }
+
+    .searchresults {
+        top: 0px !important;
+    }
+
+    .todoClasTam {
+        margin-top: -22px;
+    }
+
+    #noResultados {
+        top: 0px !important;
+    }
+
+    .noResultadostamano {
+        margin-top: -50px !important;
+    }
+
+    /* #contextsearchresults {
+        position: absolute;
+        margin-top: -32px;
+    }*/
+    /* #result, #snippet_row-0 {
+        height: 1px;
+    }*/
+    #containersearch {
+        border-bottom-width: 30px;
+    }
+
+    #comboTamanop {
+        padding-right: 0px !important;
+        width: 95% !important;
+    }
+
+    #orderAscdesc {
+        left: 9px !important;
+        padding-left: 0px;
+        width: 2%;
+    }
+
+    .columnaresponsuva {
+        font-size: 10px;
+        word-wrap: break-word;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    #tabla_relacionadas {
+        width: 100% !important;
+    }
+    /*#comboPestana {
+        padding-right: 0px !important;
+    }*/
+
+    #todoroworden {
+        top: 10px !important;
+    }
+
+    #inputtodo {
+        top: 18px !important;
+    }
+
+    .nivel_peso {
+        text-align: right !important;
+        padding-right: 0px !important;
+        left: 5px !important;
+    }
+
+    .nivel_peso1 {
+        text-align: right !important;
+        padding-right: 0px !important;
+        left: 5px !important;
+    }
+
+    .nivel_peso2 {
+        text-align: right !important;
+    }
+
+    .nivel_imagen {
+        padding-left: 15px !important;
+    }
+
+    .respo_tabulado {
+        padding-left: 15px !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px;
+    }
+
+    .respo_tabulado1 {
+        padding-left: 30px !important;
+    }
+
+    #inegi_ayuda {
+        float: right !important;
+        font-size: 20px !important;
+        padding-top: 10px !important;
+    }
+
+    .publitema {
+        width: 310% !important;
+    }
+
+    #clasbancos {
+        padding-right: 0px !important;
+        width: 310px !important;
+    }
+
+    .text_definicion {
+        text-align: left !important;
+    }
+
+    .text_programa {
+        text-align: left !important;
+        padding-left: 0px !important;
+    }
+
+    #buscaren, #ordenaren {
+        float: left !important;
+    }
+
+    #todoroworder, #buscaren {
+        padding-left: 0px !important;
+    }
+
+    #buscara {
+        width: 100%;
+    }
+
+    #buscaren {
+        padding-right: 10px !important;
+    }
+
+    #rowordenar {
+        padding-left: 2px !important;
+    }
+
+    #comboTamanop {
+        padding-left: 5px !important;
+    }
+
+    #resul_encontra {
+        width: 100% !important;
+    }
+
+    #resultados {
+        left: 10px;
+        padding-right: 0px;
+    }
+
+    a[id*="snippet_row-tag-"] {
+        float: right !important;
+    }
+
+    #row_ayuda {
+        width: 110% !important;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+
+    #informacionPrincipales {
+        width: 390px !important;
+    }
+    /*#informacionEncontrados {
+        font-size: 12px !important;
+    }*/
+}
+
+@media screen and (max-width: 400px) {
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+
+    #informacionPrincipales {
+        width: 315px !important;
+    }
+
+    #numDispoPrincipal {
+        right: -95px !important;
+    }
+}
+
+@media screen and (max-width: 398px) {
+    #resul_encontra {
+        width: 90% !important;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+
+    #numDispoPrincipal {
+        right: 0px !important;
+        padding-left: 5px !important;
+        width: 8.3% !important;
+    }
+
+    #resultados {
+        padding-left: 0px !important;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    #informacionPrincipales {
+        width: 295px !important;
+    }
+
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+    /* #informacionEncontrados {
+        font-size: 12px !important;
+    }*/
+}
+
+@media screen and (max-width: 285px) {
+    #numDispoPrincipal {
+        right: -110px !important;
+        padding-left: 5px !important;
+    }
+
+    .row_buscador_slp {
+        top: 0px !important;
+    }
+}
+/* Dispositivos pequeños (tablets, anchura mayor  500x)  767*/
+@media screen and (min-width: 760px) and (max-width: 767px) {
+
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -25px 0 0 280px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    #encBuscarLogo {
+        margin: -28px 0 0 100px !important;
+    }
+}
+
+@media screen and (min-width: 749px) and (max-width: 759px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 680px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    #encBuscarLogo {
+        margin: -28px 0 0 101px !important;
+    }
+}
+
+@media screen and (min-width: 738px) and (max-width: 748px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: 4px 0 0 0px;
+            left: -15px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 727px) and (max-width: 737px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -25px 0 0 280px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 716px) and (max-width: 726px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 648px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 711px) and (max-width: 716px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 640px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 706px) and (max-width: 710px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 635px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 698px) and (max-width: 705px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 630px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 688px) and (max-width: 697px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 615px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 682px) and (max-width: 687px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 612px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 677px) and (max-width: 682px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 602px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 671px) and (max-width: 676px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 600px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 666px) and (max-width: 670px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 590px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 656px) and (max-width: 666px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 588px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 645px) and (max-width: 655px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 580px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 641px) and (max-width: 644px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 568px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 635px) and (max-width: 640px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 560px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 624px) and (max-width: 634px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 555px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 613px) and (max-width:623px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 545px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 603px) and (max-width:613px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 535px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    #encBuscarLogo {
+        margin: -28px 0 0 101px !important;
+    }
+}
+
+@media screen and (min-width: 599px) and (max-width: 602px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 529px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 589px) and (max-width: 598px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -25px 0 0 280px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 585px) and (max-width: 589px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 516px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 579px) and (max-width: 584px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 510px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 569px) and (max-width: 578px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 500px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 558px) and (max-width: 568px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 488px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 553px) and (max-width: 558px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 486px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 542px) and (max-width: 553px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 470px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 531px) and (max-width: 541px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 465px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 521px) and (max-width: 531px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 455px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 515px) and (max-width: 520px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -25px 0 0 280px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    #encBuscarLogo {
+        /*margin: -18px 0 0 445px;*/
+        margin: -28px 0 0 100px !important;
+    }
+}
+
+@media screen and (min-width: 510px) and (max-width: 514px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 435px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 501px) and (max-width: 510px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 430px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+
+@media screen and (min-width: 470px) and (max-width: 476px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 400px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 458px) and (max-width: 468px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 390px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 448px) and (max-width: 457px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 380px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 439px) and (max-width: 449px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 370px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 428px) and (max-width: 438px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 360px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 417px) and (max-width: 427px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 355px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 406px) and (max-width: 416px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 345px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 395px) and (max-width: 405px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 330px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 380px) and (max-width: 394px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 315px !important;
+        }
+    }
+}
+
+@media screen and (min-width: 371px) and (max-width: 380px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 300px !important;
+        }
+    }
+}
+/* Dispositivos pequeños (tablets, anchura mayor  500x) */
+@media screen and (max-width: 500px) {
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+}
+/* Dispositivos muy pequeños (teléfonos de hasta 768px de anchura) */
+@media screen and (max-width: 476px) {
+
+    .respo_tabulado {
+        padding-left: 15px !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px;
+    }
+
+    .respo_tabulado1 {
+        padding-left: 30px !important;
+    }
+
+    #inegi_ayuda {
+        float: right !important;
+        font-size: 20px !important;
+        padding-top: 10px !important;
+    }
+
+    .publitema {
+        width: 310% !important;
+    }
+
+    #clasbancos {
+        padding-right: 0px !important;
+        width: 310px !important;
+    }
+
+    .text_definicion {
+        text-align: left !important;
+    }
+
+    .text_programa {
+        text-align: left !important;
+        padding-left: 0px !important;
+    }
+
+    #buscaren, #ordenaren {
+        float: left !important;
+    }
+
+
+    #buscara {
+        width: 90% !important;
+    }
+
+    #clasordn {
+        width: 96% !important;
+    }
+
+    #buscaren {
+        padding-right: 10px !important;
+    }
+
+    #todo_buscar {
+        margin-top: 0px !important;
+    }
+
+    #rowordenar {
+        padding-left: 2px !important;
+    }
+}
+
+@media screen and (max-width: 390px) {
+    #buscara {
+        width: 100% !important;
+    }
+
+    .rowTooltipPrincipal {
+        width: 65% !important;
+    }
+
+    .rowArchivo {
+        width: 80px !important;
+    }
+
+    #Slp-nivel-2-1 {
+        width: 41.66666667% !important;
+    }
+
+    #resultados {
+        width: 58.33333333% !important;
+    }
+}
+
+@media screen and (max-width:415px) {
+    #buscara {
+        width: 100% !important;
+    }
+
+    .rowTooltipPrincipal {
+        width: 65% !important;
+    }
+
+    .rowArchivo {
+        width: 80px !important;
+    }
+
+    #Slp-nivel-2-1 {
+        width: 41.66666667% !important;
+    }
+
+    #resultados {
+        width: 58.33333333% !important;
+    }
+}
+
+#cargaMapa {
+    display: none !important;
+}
+
+.flecha {
+    color: #333 !important;
+    font-size: 18px;
+    vertical-align: middle;
+}
+
+.colspanfcha {
+    padding-left: 2px;
+}
+
+.visible {
+    display: inline;
+}
+
+.oculto {
+    display: none;
+}
+
+.typeahead {
+    background: transparent;
+}
+
+div.searchGLobalBOX {
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #CCC;
+    padding: 0 10px;
+}
+
+#todas {
+    font-weight: normal;
+}
+
+#cualquiera {
+    font-weight: normal;
+}
+
+#frase {
+    font-weight: normal;
+}
+
+#Palabra_Relacion {
+    font-weight: normal;
+}
+
+#ordenaren {
+    font-weight: normal;
+}
+
+#buscaren {
+    font-weight: normal;
+}
+
+#lblNumReg, #numDispo {
+    vertical-align: super;
+}
+
+#result1 {
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+}
+
+.pagination > li.last {
+    display: none;
+}
+
+.pagination > li.first {
+    display: none;
+}
+
+.pagination > li.prev {
+    display: none;
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.42857143;
+    color: #337ab7;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.pagination > li.next {
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.42857143;
+    color: #337ab7;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+#ulIndex {
+    float: left;
+    font-size: 14px;
+}
+
+#pagina {
+    float: left;
+    margin-top: 10px;
+    padding-right: 5px;
+}
+
+.pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+    color: #2a6496 !important;
+    background-color: #eee !important;
+}
+
+.bor_seppes {
+    border-right: 0px solid #ddd !important;
+}
+
+.pintarVinculo {
+    color: #2279c0 !important;
+}
+
+#img_loading {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -75px;
+    margin-left: -75px;
+}
+
+#linea_Separador {
+    top: 28px !important;
+    width: 96% !important;
+}
+
+.color-tabulador {
+    color: #337ab7 !important;
+}
+
+
+#tr_tabu, #td_tabu {
+    height: 25px;
+}
+
+#t01 {
+    width: 100%;
+    border: 1px solid #DDD;
+    border-collapse: collapse;
+}
+
+#td_tabu {
+    width: 60%;
+    text-align: justify;
+    background-color: #f9f9f9;
+}
+
+#td_tabu2 {
+    width: 30%;
+    text-align: center;
+    background-color: white;
+}
+
+#td_tabu3 {
+    width: 10%;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+.resaltar:hover {
+    background-color: #F1F1F1;
+}
+
+.labelbancosindica {
+    font-weight: normal !important;
+}
+
+.todo {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+.iframe {
+    border: none !important
+}
+
+.img {
+    border: none
+}
+
+/*.tit-normal {
+    font-size: 13pt
+}*/
+.blockquote {
+    font-size: 13pt
+}
+
+.i-tamano, img.estilo-img {
+    width: 150px;
+    max-width: 100%;
+    max-height: 100%
+}
+
+p.keyMatch {
+    color: green
+}
+
+img.estilo-img {
+    height: 200px
+}
+
+.pdl5 {
+    margin-left: 5px
+}
+
+.pdl25 {
+    margin-left: 25px
+}
+
+.pdb5 {
+    margin-bottom: 5px
+}
+
+div#encabezado {
+    margin-bottom: 15px
+}
+
+a.home, a:Link.home {
+    font-family: Arial,Helvetica,sans-serif;
+    color: #000;
+    text-decoration: none
+}
+
+a:Visited.home {
+    color: #5b84f9;
+    text-decoration: none
+}
+
+@media screen and (min-width: 768px) {
+    #encabezado {
+        height: 94px
+    }
+}
+
+@media screen and (max-width: 767px) {
+    #encabezado {
+        height: 40px
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .imgMax {
+        /*max-width: 431px;*/
+        max-width: 351px;
+        max-height: 223px
+    }
+}
+
+.topForm {
+    padding-top: 0
+}
+
+blockquote {
+    padding: 0 !important;
+    margin-bottom: 0 !important;
+    border-left: 0 solid #eee !important
+}
+
+/*.masde {
+    padding-bottom: 25px;
+    padding-top: 15px
+}*/
+
+.titulo-sin-nivel {
+    margin-top: 25px
+}
+
+.hr-topTab {
+    margin-top: 0;
+    margin-bottom: 2px
+}
+
+.hr-top {
+    margin-top: 10px;
+    margin-bottom: 2px
+}
+
+.hr-bot {
+    margin-top: 0
+}
+
+.capa-titulo {
+    background-color: #B0B0B0;
+    height: 20px
+}
+
+.img-prod-map {
+    margin-left: 50px;
+    margin-bottom: 15px;
+    margin-top: 15px
+}
+
+.capa-titulo-texto {
+    position: absolute;
+    padding-bottom: 1em;
+    padding-top: 1em;
+    color: #000;
+    font-size: 23px;
+    min-height: 4em;
+    text-align: left;
+    font-weight: 700
+}
+
+.b-t {
+    display: table
+}
+
+.b-f {
+    display: table-row
+}
+
+.b-c, .b-c_r {
+    display: table-cell
+}
+
+.b-c_r {
+    padding-left: 10px
+}
+
+.i-sombra {
+    box-shadow: 0 8px 15px #656565
+}
+
+.i-tamano {
+    height: 200px
+}
+
+.b-tituloSnippet {
+    font-weight: 700;
+    font-size: large
+}
+
+.espacios {
+    margin-bottom: 8px
+}
+
+.separadorRubros {
+    background-color: #eee;
+    color: #000;
+    margin-bottom: 20px;
+    padding-left: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px
+}
+
+#nubeF, div.jqcloud {
+    overflow: hidden;
+    position: relative;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 10px;
+    line-height: normal;
+    color: #09f
+}
+
+.ac-renderer, .icoES {
+    position: absolute
+}
+
+.fc td > div {
+    min-height: 20px !important;
+    min-width: 20px !important
+}
+
+div.jqcloud span {
+    padding: 0
+}
+
+div.jqcloud a:hover {
+    color: #5d6569
+}
+
+.tituloBIINEGI {
+    color: #2279c0;
+    padding: 10px 10px 0;
+    font-size: 2em
+}
+
+.ac-renderer {
+    background: #fff;
+    border-bottom: 1px solid #558BE3;
+    border-left: 1px solid #A2BFF0;
+    border-right: 1px solid #558BE3;
+    border-top: 1px solid #A2BFF0;
+    min-width: 200px;
+    max-width: 400px;
+    overflow-x: hidden
+}
+
+    .ac-renderer div.ss-gac-b div, .ss-gac-b, div.ss-gac-m div.active {
+        background-color: #eee
+    }
+
+.ss-embed-mode {
+    margin-top: 27px !important;
+    right: -20px;
+    width: 365px
+}
+
+.ss-gac-m {
+    border: 1px solid #000;
+    cursor: default;
+    font-size: 13px;
+    line-height: 22px;
+    margin: 0;
+    z-index: 99
+}
+
+.ss-gac-e span, .tt-suggestion:hover, div#Ttbs > div {
+    cursor: pointer
+}
+
+.ss-gac-c {
+    padding-left: 3px;
+    text-align: left
+}
+
+.ss-gac-d, .ss-gac-e td {
+    font-size: 10px;
+    text-align: right
+}
+
+.ss-gac-d {
+    color: green;
+    padding: 0 3px;
+    float: right
+}
+
+    .ss-gac-d b.ac-highlighted {
+        font-weight: 400
+    }
+
+.ss-gac-b td {
+    color: #fff
+}
+
+.ss-gac-e td {
+    line-height: 15px;
+    padding: 0 3px 2px
+}
+
+.ss-gac-e span {
+    color: #00c;
+    text-decoration: underline
+}
+
+.ac-renderer div.ss-gac-a {
+    font-size: 100%;
+    margin: 0;
+    padding: 0 4px
+}
+
+    .ac-renderer div.ss-gac-a div {
+        font-size: 100%;
+        margin: 0;
+        padding: 0
+    }
+
+        .ac-renderer div.ss-gac-a div.ss-gac-d {
+            padding-left: 4px
+        }
+
+div.ac-renderer div.ss-gac-a div.ss-gac-c b {
+    color: #000
+}
+
+.btn-default_buscador.active, .btn-default_buscador.focus, .btn-default_buscador:active, .btn-default_buscador:focus, .btn-default_buscador:hover, .open > .dropdown-toggle.btn-default_buscador {
+    background-color: #889399;
+    border-color: #889399
+}
+
+.btn-default_buscador {
+    background-color: #fff;
+    border-color: #adadad;
+    color: #000;
+}
+
+#rPertinentes {
+    display: none
+}
+
+.indLink {
+    color: #70787C
+}
+
+div#Ttbs div.sitioBuscado {
+    border-bottom-style: solid;
+    border-bottom-width: 3px;
+    border-bottom-color: #2279C0;
+    color: #2279C0;
+    font-weight: 700
+}
+
+div#Ttbs > div {
+    display: inline-block;
+    padding: 10px;
+    font-size: 13pt
+}
+
+    div#Ttbs > div:not(div:hover) {
+        color: #000
+    }
+
+    div#Ttbs > div:hover {
+        color: #7DA2C1
+    }
+
+.bs-example {
+    font-family: sans-serif;
+    position: relative;
+    margin: 100px
+}
+
+.tt-hint {
+    background-color: #fff;
+    background-image: none;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    color: #999
+}
+
+.tt-dropdown-menu {
+    background-color: #FFF;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    margin-top: 1px;
+    padding: 8px 0;
+    width: 100%
+}
+
+.tt-suggestion {
+    background-color: #FFF;
+}
+
+    .tt-suggestion.tt-is-under-cursor {
+        background-color: #DADADA
+    }
+
+    .tt-suggestion p {
+        margin: 0
+    }
+
+.tt-hint, .tt-query, .typeahead {
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 8px;
+    outline: 0
+}
+
+.typeahead {
+    background-color: #FFF
+}
+
+.tt-suggestion.tt-cursor, .tt-suggestion:hover {
+    background-color: #DADADA
+}
+
+.typeahead:focus {
+    border: 1px solid #DADADA
+}
+
+.tt-menu {
+    width: 100%;
+    margin: 1px 0 12px;
+    padding: 0px 0;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.2);
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    box-shadow: 0 5px 10px rgba(0,0,0,.2)
+}
+
+.tt-suggestion {
+    font-size: 15px;
+    line-height: 18px;
+    padding: 3px 10px;
+    text-align: left;
+    color: #333;
+}
+
+.twitter-typeahead {
+    width: 100%;
+    margin-top: 4px
+}
+
+#encBuscarLogo {
+    position: relative;
+    z-index: 100;
+    vertical-align: top;
+    border: 0 none !important;
+    cursor: pointer !important;
+    width: 65px !important;
+    background-repeat: no-repeat !important;
+    background: #0d6efd !important;
+    color: #fff !important;
+    margin: -28px 0 0 0 !important;
+    position: absolute !important;
+    top: 26px !important;
+    left: 200px;
+    height: 31px !important;
+    padding-top: 2px !important;
+}
+
+#enc_buscador {
+    border: 0 solid transparent;
+    float: right;
+    height: 27px;
+    /*margin: 4px 0 0;*/
+    margin: 10px 0 0;
+    width: 100%;
+}
+
+#inputQ {
+    margin: -3px 0 0 0 !important;
+    border-radius: 5px;
+}
+
+#search {
+    margin: -3px 0 0 0 !important;
+}
+
+#btnLimpiar {
+    margin: -3px 0 0 0 !important;
+}
+
+/*#enc_buscador_tx {
+    border-radius: 5px !important;
+    float: left !important;
+    height: 33px !important;
+    outline: none !important;
+    padding: 3px 45px 2px 10px !important;
+    width: 100% !important;
+    margin: -3px 0 0 0 !important;
+}*/
+.twitter-typeahead {
+    display: contents !important;
+}
+
+#tachaBuscador {
+    position: absolute !important;
+    z-index: 100 !important;
+    vertical-align: top !important;
+    border: 0 none !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    background-repeat: no-repeat !important;
+}
+/*
+#the-basics {
+    width: 65% !important;
+}*/
+
+/**************************Estilos para IE****************************************/
+@media screen and (min-width:0\0) and (min-width: 1202px) {
+    /* Tus estilos CSS para IE9, IE10, IE11  */
+    #tachaBuscador {
+        margin: -25px 0 0 256px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 995px) and (max-width: 1198px) {
+    /* Tus estilos CSS para IE9, IE10, IE11  */
+    #tachaBuscador {
+        margin: -25px 0 0 208px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 768px) and (max-width: 992px) {
+    /* Tus estilos CSS para IE9, IE10, IE11  */
+    #tachaBuscador {
+        margin: -25px 0 0 215px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 760px) and (max-width: 767px) {
+    #tachaBuscador {
+        margin: -25px 0 0 692px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 749px) and (max-width: 759px) {
+    #tachaBuscador {
+        margin: -25px 0 0 680px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 738px) and (max-width: 748px) {
+    #tachaBuscador {
+        margin: -25px 0 0 670px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 727px) and (max-width: 737px) {
+    #tachaBuscador {
+        margin: -25px 0 0 657px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 716px) and (max-width: 726px) {
+    #tachaBuscador {
+        margin: -25px 0 0 648px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 711px) and (max-width: 716px) {
+    #tachaBuscador {
+        margin: -25px 0 0 640px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 706px) and (max-width: 710px) {
+    #tachaBuscador {
+        margin: -25px 0 0 635px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 698px) and (max-width: 705px) {
+    #tachaBuscador {
+        margin: -25px 0 0 630px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 688px) and (max-width: 697px) {
+    #tachaBuscador {
+        margin: -25px 0 0 615px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 682px) and (max-width: 687px) {
+    #tachaBuscador {
+        margin: -25px 0 0 612px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 677px) and (max-width: 682px) {
+    #tachaBuscador {
+        margin: -25px 0 0 602px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 671px) and (max-width: 676px) {
+    #tachaBuscador {
+        margin: -25px 0 0 600px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 666px) and (max-width: 670px) {
+    #tachaBuscador {
+        margin: -25px 0 0 590px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 656px) and (max-width: 666px) {
+    #tachaBuscador {
+        margin: -25px 0 0 588px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 645px) and (max-width: 655px) {
+    #tachaBuscador {
+        margin: -25px 0 0 580px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 641px) and (max-width: 644px) {
+
+    #tachaBuscador {
+        margin: -25px 0 0 568px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 635px) and (max-width: 640px) {
+    #tachaBuscador {
+        margin: -25px 0 0 560px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 624px) and (max-width: 634px) {
+    #tachaBuscador {
+        margin: -25px 0 0 555px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 613px) and (max-width:623px) {
+    #tachaBuscador {
+        margin: -25px 0 0 545px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 603px) and (max-width:613px) {
+    #tachaBuscador {
+        margin: -25px 0 0 535px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 599px) and (max-width: 602px) {
+    #tachaBuscador {
+        margin: -25px 0 0 529px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 589px) and (max-width: 598px) {
+    #tachaBuscador {
+        margin: -25px 0 0 520px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 585px) and (max-width: 589px) {
+    #tachaBuscador {
+        margin: -25px 0 0 516px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 579px) and (max-width: 584px) {
+    #tachaBuscador {
+        margin: -25px 0 0 510px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 569px) and (max-width: 578px) {
+    #tachaBuscador {
+        margin: -25px 0 0 500px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 558px) and (max-width: 568px) {
+    #tachaBuscador {
+        margin: -25px 0 0 488px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 553px) and (max-width: 558px) {
+    #tachaBuscador {
+        margin: -25px 0 0 486px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 542px) and (max-width: 553px) {
+    #tachaBuscador {
+        margin: -25px 0 0 470px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 531px) and (max-width: 541px) {
+    #tachaBuscador {
+        margin: -25px 0 0 465px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 521px) and (max-width: 531px) {
+    #tachaBuscador {
+        margin: -25px 0 0 455px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 515px) and (max-width: 520px) {
+    #tachaBuscador {
+        margin: -25px 0 0 445px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 510px) and (max-width: 514px) {
+    #tachaBuscador {
+        margin: -25px 0 0 435px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 501px) and (max-width: 510px) {
+    #tachaBuscador {
+        margin: -25px 0 0 430px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 496px) and (max-width: 510px) {
+    #tachaBuscador {
+        margin: -25px 0 0 430px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 480px) and (max-width: 495px) {
+    #tachaBuscador {
+        margin: -25px 0 0 415px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 463px) and (max-width: 479px) {
+    #tachaBuscador {
+        margin: -25px 0 0 399px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 450px) and (max-width: 462px) {
+    #tachaBuscador {
+        margin: -25px 0 0 385px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 436px) and (max-width: 449px) {
+    #tachaBuscador {
+        margin: -25px 0 0 365px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 420px) and (max-width: 435px) {
+    #tachaBuscador {
+        margin: -25px 0 0 348px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 400px) and (max-width: 419px) {
+    #tachaBuscador {
+        margin: -25px 0 0 332px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 379px) and (max-width: 399px) {
+    #tachaBuscador {
+        margin: -25px 0 0 315px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 368px) and (max-width: 378px) {
+    #tachaBuscador {
+        margin: -25px 0 0 305px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 347px) and (max-width: 367px) {
+    #tachaBuscador {
+        margin: -25px 0 0 280px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 326px) and (max-width: 346px) {
+    #tachaBuscador {
+        margin: -25px 0 0 255px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 313px) and (max-width: 325px) {
+    #tachaBuscador {
+        margin: -25px 0 0 240px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 300px) and (max-width: 312px) {
+    #tachaBuscador {
+        margin: -25px 0 0 230px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 283px) and (max-width: 299px) {
+    #tachaBuscador {
+        margin: -25px 0 0 215px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 279px) and (max-width: 282px) {
+    #tachaBuscador {
+        margin: -25px 0 0 209px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 268px) and (max-width: 278px) {
+    #tachaBuscador {
+        margin: -25px 0 0 202px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 257px) and (max-width: 267px) {
+    #tachaBuscador {
+        margin: -25px 0 0 192px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (min-width: 246px) and (max-width: 256px) {
+    #tachaBuscador {
+        margin: -25px 0 0 172px !important;
+    }
+}
+
+@media screen and (min-width:0\0) and (max-width: 245px) {
+    #tachaBuscador {
+        margin: -25px 0 0 160px !important;
+    }
+}
+
+@media screen and (min-width:0\0) {
+    #enc_buscador #encBuscarLogo, #enc_buscador .ui-btn {
+        margin: 8px 0 0 -30px !important;
+    }
+
+    input::-ms-clear {
+        display: none;
+    }
+}
+
+/**************************Estilos para IE EDGE****************************************/
+@supports (-ms-ime-align:auto) {
+    input::-ms-clear {
+        display: none;
+    }
+
+    #enc_buscador #encBuscarLogo, #enc_buscador .ui-btn {
+        margin: 8px 0 0 -30px !important;
+    }
+}
+
+
+/**************************Estilos para Mozilla****************************************/
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 1202px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 995px) and (max-width: 1198px) {
+    /* Tus estilos CSS para IE9, IE10, IE11  */
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 768px) and (max-width: 992px) {
+    /* Tus estilos CSS para IE9, IE10, IE11  */
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 760px) and (max-width: 767px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 749px) and (max-width: 759px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 738px) and (max-width: 748px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 727px) and (max-width: 737px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 716px) and (max-width: 726px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 711px) and (max-width: 715px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 706px) and (max-width: 710px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 698px) and (max-width: 705px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 688px) and (max-width: 697px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 682px) and (max-width: 687px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 677px) and (max-width: 681px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 671px) and (max-width: 676px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 666px) and (max-width: 670px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 656px) and (max-width: 665px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 645px) and (max-width: 655px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 641px) and (max-width: 644px) {
+
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 635px) and (max-width: 640px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0)and (min-width: 624px) and (max-width: 634px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 613px) and (max-width:623px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 603px) and (max-width:613px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 599px) and (max-width: 602px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 589px) and (max-width: 598px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 585px) and (max-width: 589px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0)and (min-width: 579px) and (max-width: 584px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 569px) and (max-width: 578px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 558px) and (max-width: 568px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 553px) and (max-width: 558px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 542px) and (max-width: 553px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 531px) and (max-width: 541px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 521px) and (max-width: 531px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 515px) and (max-width: 520px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 510px) and (max-width: 514px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 501px) and (max-width: 510px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 496px) and (max-width: 510px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 480px) and (max-width: 495px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 463px) and (max-width: 479px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 450px) and (max-width: 462px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 436px) and (max-width: 449px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 420px) and (max-width: 435px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+
+@media all and (min--moz-device-pixel-ratio:0) and (min-width: 400px) and (max-width: 419px) {
+    #tachaBuscador {
+        margin: -18px 0 0 -40px !important;
+    }
+}
+/* Dispositivos grandes (ordenadores, anchura mayor   1200px) */
+@media screen and (min-width: 1202px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -25px 0 0 255px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    .publitema {
+        width: 110% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    #row_ayuda {
+        width: 1140px;
+    }
+}
+/* Dispositivos grandes (ordenadores, anchura mayor o igual a 1200px) */
+@media screen and (min-width: 995px) and (max-width: 1198px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -23px 0 0 205px !important;
+        }
+    }
+
+    .publitema {
+        width: 115% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    #labelBI {
+        padding-right: 0px !important;
+    }
+
+    #row_ayuda {
+        width: 950px;
+    }
+
+    #ordena_todo, #buscaPor {
+        float: none !important;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+    }
+
+    #clasbancos {
+        padding-right: 0px !important;
+    }
+
+    #ordenatodo {
+        padding-left: 15px !important;
+    }
+
+    #radio2 {
+        float: left !important;
+    }
+
+    .esp, .esp2 {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    #buscaen {
+        padding-left: 10px !important;
+    }
+
+    #resupaginacion {
+        text-align: left !important;
+    }
+
+    #busen {
+        padding-left: 12px !important;
+        padding-top: 0px !important;
+        text-align: left !important;
+    }
+
+    #rowtodobusca {
+        padding-left: 0px !important;
+    }
+
+    #rowinput {
+        margin-bottom: 0px !important;
+    }
+
+    #todorowordenar {
+        padding-left: 35px !important;
+    }
+}
+/* Dispositivos medianos (ordenadores, anchura mayor o igual a 992px) */
+@media screen and (min-width: 768px) and (max-width: 992px) {
+    @supports (-ms-ime-align:auto) {
+        #tachaBuscador {
+            margin: -22px 0 0 28px !important;
+        }
+    }
+
+    #tachaBuscador {
+        margin: 4px 0 0 0px;
+        left: -15px !important;
+    }
+
+    .publitema {
+        width: 125% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px !important;
+    }
+
+    .noticias_peso {
+        padding-left: 40px !important;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+        width: 140px !important;
+    }
+
+    #row_ayuda {
+        width: 805px;
+    }
+
+    .text_definicion {
+        text-align: left !important;
+    }
+
+    .text_programa {
+        text-align: left !important;
+        padding-left: 0px !important;
+    }
+
+    #ordena_todo, #buscaPor {
+        float: none !important;
+    }
+
+    #buscaen {
+        padding-left: 10px !important;
+    }
+
+    #buscaren {
+        padding-left: 5px !important;
+    }
+
+
+
+
+
+    #radio2 {
+        float: left !important;
+    }
+
+    .esp, .esp2 {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+
+
+    #busen {
+        padding-left: 10px !important;
+        padding-top: 0px !important;
+        text-align: left !important;
+    }
+
+    #rowtodobusca, #todobuscaen {
+        padding-left: 0px !important;
+    }
+
+    #rowinput {
+        margin-bottom: 0px !important;
+    }
+
+    #todorowordenar, #ordenatodo {
+        padding-left: 15px !important;
+    }
+}
+
+/* Dispositivos pequeños (tablets, anchura mayor o igual a 768px) */
+@media screen and (min-width: 477px) and (max-width: 768px) {
+
+    .publitema {
+        width: 114% !important;
+    }
+
+    .noticias_row {
+        padding-left: 0px !important;
+    }
+
+    .respo_tabulado {
+        padding-left: 15px !important;
+    }
+
+    .respo_tabulado1 {
+        padding-left: 30px !important;
+    }
+
+    #bancos {
+        padding-right: 0px !important;
+    }
+
+    #clasbancos {
+        padding-right: 0px !important;
+        width: 310px !important;
+    }
+
+    #inegi_ayuda {
+        float: right;
+        font-size: 20px;
+        padding-top: 10px;
+    }
+
+    .text_definicion {
+        text-align: left !important;
+    }
+
+    .text_programa {
+        text-align: left !important;
+        padding-left: 0px !important;
+    }
+
+    #buscaren, #ordenaren {
+        float: left !important;
+    }
+
+    #rowordenar {
+        padding-left: 2px !important;
+        padding-top: 0px !important;
+    }
+
+    #buscaren {
+        padding-right: 10px !important;
+        padding-top: 10px !important;
+    }
+
+    #buscara {
+        width: 100%;
+    }
+
+    #ordenaren {
+        padding-top: 10px !important;
+    }
+
+    #ordenaren {
+        padding-left: 5px !important;
+    }
+
+    #busen {
+        padding-top: 0px !important;
+    }
+}
+
+.bbl-no-link_buscador {
+    font-size: 12pt;
+    margin-right: -5px;
+    color: #333 !important;
+    text-decoration: none !important;
+}
+
+.tooltip-inner {
+    white-space: pre;
+    max-width: none;
+}

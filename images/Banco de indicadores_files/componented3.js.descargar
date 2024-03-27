@@ -1,0 +1,4189 @@
+
+let validaind = false;
+let idelm;//id del elemento principal
+let format;
+let tooltipTop;
+let topLegend=345;
+let ua = window.navigator.userAgent;
+let trident = ua.indexOf("Trident/");
+let edge = ua.indexOf("Edge/");
+let  arrCompara = [];
+let svgM,pathM; 
+
+
+
+
+
+
+/*
+informacion
+objeto
+idioma
+estra
+estratoslim
+colores
+fuentesAdd
+notasAdd
+escala
+cobertura=est/mun/pais
+etiqueta=fija/over
+dataMun 
+mcompara
+*/
+
+function iniciaMapD3(D3parametros, caso){
+  mapasTemObj_D3[0]["municipiosR"]='';
+  switch (caso) {
+    case 'normal':
+      if(D3parametros.cobertura==='pais'){
+        importarScript_Callback("https://d3js.org/d3-geo-projection.v2.min.js", scriptCargado);
+        function scriptCargado() { 
+          crearmapaMundi(D3parametros);
+        }
+      }
+      else if(D3parametros.cobertura==='mun'){
+        crearmapad3Municipios(D3parametros);
+      }
+      else{
+          if (D3parametros.estra == '1'||D3parametros.estra == '2')
+            crearmapad3conApis(D3parametros);
+          else {
+              crearmapad3(D3parametros);
+          }
+      }
+      break;
+      case'simplect':
+        crearmapad3simplecontooltip(D3parametros);
+      break;
+      case'simplegris':
+        crearmapad3simplegris(D3parametros);
+      break;
+    default:
+      break;
+  }
+ 
+}
+
+function scriptCargado() { 
+  console.log(x); 
+}
+
+function crearmapaMundi(D3parametros){
+  
+  let banderaColores= false;
+  let tipoTematico=false;
+  let tipoDirectorio=false;
+  let legend ;
+  let contmap=0;
+  const tipoMundi=true;
+  let dato_f=D3parametros.informacion;
+  let elm = D3parametros.objeto;
+  let color=D3parametros.colores;
+  let  escala = D3parametros.estra;
+  let height;
+  let heightLegend;
+  let rangeColores =[];
+  let elmObj = cr_elem_D3('div', '', { 'id': 'objMapa_' + elm.id,'style': 'min-height:350px'}, '');
+  let elemento = document.getElementById(elm.id);
+  elemento.appendChild(elmObj);
+    
+    
+  if(color.length > 1){
+    banderaColores=true;
+     for(let co=0;co<color.length;co++){
+        rangeColores[co]=color[co];
+    } 
+  }
+  else
+    rangeColores=color;
+
+  rangeColores = rangeColores.filter(function (dato) {
+        return dato != undefined
+  });
+
+  if (screen.width <= 500) 
+    height = $('#objMapa_' + elm.id).innerHeight();
+  else
+    height = $('#' + elm.id).innerHeight();
+
+  let width = $('#' + elm.id).innerWidth();
+
+
+  svgM = d3.select("#objMapa_" + elm.id).append("svg")
+      .attr("id", "Capa_1"+ elm.id)
+      .attr("width", width)
+      .attr("height", height+60);
+      
+
+    let projection = d3.geoCylindricalStereographic()
+            .scale(width/ 2.3 / Math.PI) 
+            .rotate([0, 0]) 
+            .center([0, 0]) 
+            .translate([width / 2, height / 1.5]);
+
+    let tooltip = d3.select("#"+elm.id).append("div")
+            .attr("id", "tooltipmap"+elm.id)
+            .attr("class", "tooltipmap")
+            .style("opacity", 0);
+
+     pathM = d3.geoPath().projection(projection);
+    let format = d3.format(",." + cantidadDecimales(dato_f.valores[0].val) + "f");
+
+    heightLegend=rangeColores.length*25;
+    let all = getAll(true, '',dato_f.valores);
+    let ordenar = all.sort(function (a, b) { return a - b });
+
+      if (escala == "3") {
+        color = d3.scaleQuantize()
+       .domain([Math.min.apply(Math, all), Math.max.apply(Math, all)]) // setting the range of the input data
+         .range(rangeColores);
+     }
+     else {
+       let colorq= [];
+       for (let co=0;co<escala;co++){
+         colorq[co]=rangeColores[co];
+         }
+        color = d3.scaleQuantile()
+         .domain(ordenar)
+         .range(rangeColores);
+          // setting the range of the input data;
+     }
+    
+    let valor_,nom_pais,json_pais,centroid,latlon;
+    // Loading the json data
+    d3.json('/componentes/mapad3/data/paises.json',function (data) {
+      
+      for(let t=0;t<mapasTemObj_D3.length;t++){
+        if(elm.id==mapasTemObj_D3[t].id)
+          contmap=t;
+      }
+       let paises = topojson.feature(data, data.objects.salida);
+
+                datainf = dato_f.valores;
+        for (let i = 0; i < datainf.length; i++) {
+            try {
+
+              nom_pais=datainf[i].id;
+            } catch (error) {
+              valor_ = 0;
+              console.log(error);
+            }
+            for (let j = 0; j < data.objects.salida.geometries.length; j++) {
+                json_pais=data.objects.salida.geometries[j].properties.PAÍS;
+                if(removeAccents(nom_pais)===removeAccents(json_pais)){
+                    valor_ = quitarcomas(datainf[i].val);
+                    data.objects.salida.geometries[j].properties.valor= Number(valor_);
+                    data.objects.salida.geometries[j].properties.color = color(valor_);
+                    data.objects.salida.geometries[j].properties.nombrePais= nom_pais;
+                    mapasTemObj_D3[contmap]["municipios"][i].color = color(valor_);
+                    //mapasTemObj_D3[contmap]["municipios"][i].coordenadas = paises.features[j];
+                }
+                else{
+                    data.objects.salida.geometries[j].properties.nombrePais= json_pais;
+                }
+            }
+        }
+
+        let g; 
+        if(D3parametros.etiqueta=='fija')
+          g= etiquetasFijas(svgM,paises,pathM,format,tipoMundi);
+        else
+        g=etiquetasTooltip(svgM,paises,pathM,format,tooltip,elm,tipoMundi,'');
+
+        if (banderaColores){
+           legend = d3.select("#objMapa_" + elm.id).append("svg")
+          .attr("id", "estMapa_" + elm.id)
+          .attr("height", heightLegend)
+          .attr("class", "legend")
+          .selectAll("g")
+          .data(color.range())
+          .enter()
+          .append("g")
+          .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+          .on("click", function (d, i) {
+            // clicking an active entry: reset
+            if (highlighted == d) {
+              g.style("opacity", 1);
+              legend.selectAll("rect")
+                .style("class", function (d) { return d; });
+              highlighted = ""; // rest
+            }
+            else {
+              highlighted = d;
+
+              g.style("opacity", 0.2)
+                .filter(function (f) {
+                  return color(f.properties.valor) == d
+                })
+                .style("opacity", 1);
+
+              // set legend:
+              legend.selectAll("rect")
+                .style("class", "white");
+  
+              d3.select(this).select("rect")
+                .style("fill", function (d) { return d; });
+            }
+  
+          })
+          .call(responsiveLegend);
+      
+          legend.append("rect")
+            .attr("width", 18)
+            .attr("height", 15)
+            .style("fill", function (d) {
+              return d;
+            })
+            .style("cursor", "pointer");
+          legend.append("text")
+            .attr("x", 24)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .text(function (d, i) {
+              let extent = color.invertExtent(d);
+              let t = "";
+                if (encDomIng)
+                  t = "from " + format(extent[0]) + " less than " + format(+extent[1]);
+                else
+                  t = "de " + format(extent[0]) + " a menos de  " + format(+extent[1]);
+              //extent will be a two-element array, format it however you want:
+              return t
+            });
+          let highlighted = "";
+      }
+      else{
+        let legend = d3.select("#objMapa_" + elm.id).append("svg")
+        .attr("id", "estMapa_" + elm.id)
+        .attr("height", "0px");
+      }  
+           /* importarScript("js/countrydata.js", scriptCargado);
+        function scriptCargado() { 
+          fillSelect();
+        }*/
+      if(D3parametros.mcompara){
+        fillSelect();
+      }     
+
+    });
+    addNotasFuente( D3parametros.idioma, elm, D3parametros.notasAdd, D3parametros.fuentesAdd);
+
+
+}
+
+const fillSelect = () => {
+  let a = [];
+    for (var t in infoPaises )
+             a[a.length] = [infoPaises[t][0], t];
+     a.sort();
+    addOptions("select-pais-base",a);
+    addOptions("select-pais",a);
+
+   
+};
+
+const calculoComapara = (idelmP) => {
+  //limpiamos el svg de los circulos y las lineas de conexion
+  const element = document.getElementById("svgCompara");
+  if(element != null)
+    element.remove();
+  d3.selectAll('.connections').remove()
+  
+
+  arrCompara = [];
+  let coordP, coordH,indexP,indexH,porcentaje,xCir;
+  arrCompara[0]=$('#select-pais-base').val();
+  indexP=mapasTemObj_D3[0]["municipios"].find((P) => P.nombre==arrCompara[0]);
+  let arrayPaises=$('#select-pais').val();
+  if (arrCompara[0]!=null){
+    xCir=7;
+
+  //creamos el svg para los circulos  
+  const svgCircles =d3.select("#objMapa_"+idelmP.id).append("svg")
+    .attr("id", "svgCompara")
+    .attr("width",'100%')
+    .attr("height", 140);
+
+    circle(svgCircles,0,indexP,xCir+'%');
+    if(arrayPaises!=null){
+        if(arrayPaises.length > 1) {
+          for(let x=0; x<arrayPaises.length; x++) {
+            xCir=xCir+10;
+            arrCompara[x+1]=arrayPaises[x];
+            indexH=mapasTemObj_D3[0]["municipios"].find((P) => P.nombre==arrayPaises[x]);
+            porcentaje = calculosPorc(indexH.valor,indexP.valor);
+            circle(svgCircles,porcentaje,indexH,xCir+'%');
+           
+            //TODO: NO FUNCIONA  BIEN
+            conections(indexP,indexH);
+          }
+      }
+      else{
+        xCir=xCir+10;
+        arrCompara.push(arrayPaises[0]);
+        indexH=mapasTemObj_D3[0]["municipios"].find((P) => P.nombre==arrayPaises[0]);
+        porcentaje = calculosPorc(indexH.valor,indexP.valor);
+        circle(svgCircles,porcentaje,indexH,xCir+'%');
+        //TODO: NO FUNCIONA  BIEN lo de connections
+        conections(indexP,indexH);
+      }
+    }
+    else{
+      alert("NO HAS SELECCIONADO PAISES PARA COMPARAR");
+    }
+  }
+  else{
+    alert("NO HAS SELECCIONADO PAIS BASE")
+  }
+
+
+}; 
+
+ function crearmapad3Municipios(D3parametros) {
+   let banderaAPI = false;
+  let tipoDirectorio=false;
+  let datainf;
+  let tipoTematico=false;
+  let color;
+  let svg ,legend;
+  let rangeColores =[];
+  let response = D3parametros.informacion;
+  let elm = D3parametros.objeto;
+  let encDomIng = D3parametros.idioma;
+  let dataEstra = D3parametros.estratoslim;
+  let estrato=D3parametros.estra;
+  let height;
+  let  lengEstra;
+  let g, states,featuresmun, txtMun ;
+  let gMun;
+  let bextremosar=false, bextremosab=false,bceros=false;
+  let bextremosarMun=false, bextremosabMun=false,bcerosMun=false;
+  let active = d3.select(null);
+  let width = $('#' + elm.id).innerWidth();
+  let projection = d3.geoAlbers();
+  let path = d3.geoPath().projection(projection);
+  let zoom = d3.zoom()
+  .scaleExtent([1, 40])
+  .on("zoom", zoomed);
+  //proyeccion
+ let jsonRes;
+ let dataEstrad3Mun;
+
+
+ let filtrodataMun;
+  let elemento = document.getElementById(elm.id);
+  let  sitioIng = window.location.host.match(/en.\w+[inegi.org.mx]+/gi);
+  let btnVista= document.createElement("button");
+  btnVista.setAttribute('type','button');
+  btnVista.setAttribute('id', 'btnVista'+elm.id);
+  btnVista.setAttribute('class', 'btn btn-default btn-md vista')
+  btnVista.setAttribute('style', 'font-size:15pt;display:none;margin: 15px;width: 45px;position: relative');
+  btnVista.setAttribute('title', (sitioIng) ? 'Back to national view' : 'Regresar a la vista por entidad federativa');
+  elemento.appendChild(btnVista);
+  document.getElementById('btnVista'+elm.id).innerHTML = '<span class="inegi-icono inegi-nav-izq" aria-hidden="true"></span>';
+  let elmObj = cr_elem_D3('div', '', { 'id': 'objMapa_' + elm.id,'style': 'min-height:350px'}, '');
+  elemento.appendChild(elmObj);
+
+
+  if(estrato==='1'||estrato==='2'){
+    banderaAPI=true;
+    for (let e = 0; e < dataEstra.length; e++) {
+      if(dataEstra[e].nestrato=='extremosar')
+         bextremosar = true;
+     if(dataEstra[e].nestrato=='extremosab')
+         bextremosab =true;
+     if(dataEstra[e].nestrato=='ceros')
+       bceros =true;   
+   }
+   lengEstra=dataEstra.length;
+   if(elm.colorfijo){
+    for(let co=0;co<lengEstra;co++){
+      if(D3parametros.colores[co]===undefined){
+        lengColores=D3parametros.colores.length-1;
+        if(lengColores===lengEstra){
+          lengEstra++;
+        }
+        else{
+          rangeColores[co]='#000';
+          console.log("PRECAUCIÓN: No mandaste la cantidad adecauda de colores fijos acorde a los estratos");
+        }
+      }
+      else{
+        rangeColores[co]=D3parametros.colores[co];
+      }
+    }
+  }
+  else{
+    for(let co=0;co<lengEstra;co++){
+      if(D3parametros.colores[co]===undefined){
+        lengEstra++;
+      }
+      else{
+        rangeColores[co]=D3parametros.colores[co];
+      }
+    }
+  }
+  }
+  else{
+    banderaAPI=false;
+    if(elm.colorfijo){
+      for(let co=0;co<dataEstra.length;co++){
+        if(D3parametros.colores[co]==undefined){
+          rangeColores[co]='#000';
+          console.log("PRECAUCIÓN: No mandaste la cantidad adecauda de colores fijos acorde a los estratos");}
+        else
+          rangeColores[co]=D3parametros.colores[co];
+    }
+    }
+    else{
+        for(let co=0;co<dataEstra.length;co++){
+          rangeColores[co]=D3parametros.colores[co];
+      } 
+    }
+  }
+    
+
+  let contmap=0;
+  for(let t=0;t<mapasTemObj_D3.length;t++){
+      if(elm.id==mapasTemObj_D3[t].id)
+        contmap=t;
+  }
+
+  fuenteAdi = D3parametros.fuentesAdd;
+  escala = D3parametros.estra;
+
+
+    dataEstrad3 = [];
+    idelm = elm.id;
+    if (elm.id.includes("mapaTematico")) {
+      tipoTematico=true;
+      if(elm.id=="mapaTematico")
+        tipoDirectorio = true;
+      validaind = true;
+      if (trident > 0 || edge > 0) 
+        topLegend=410;
+      else
+        topLegend=130;
+    }
+    else {
+      if (trident > 0 || edge > 0) 
+      topLegend=655;
+      else
+        topLegend=345;
+      if (response == undefined)
+        validaind = false;
+      else if (response[0] == undefined)
+        validaind = true;
+      else if (response[0].Indicador != elm.indicador)
+        validaind = false;
+      else
+        validaind = true;
+    }
+
+    calcularTop(elm,tipoTematico,tipoDirectorio);
+    let nom_estado,cve_mun;
+    let valor_;
+
+
+
+    if (screen.width <= 500) 
+      height = $('#objMapa_' + elm.id).innerHeight();
+    else
+      height = $('#' + elm.id).innerHeight();
+
+  
+      //creamos contenedor
+       svg = d3.select("#objMapa_" + elm.id).append("svg")
+        .attr("id", "Capa_1"+  elm.id)
+        .attr("width", width)
+        .attr("height", height)
+        .on("click", stopped, true);
+
+        
+       
+    
+        let tooltip = d3.select("#objMapa_" + elm.id).append("div")
+        .attr("id", "tooltipmap"+ elm.id)
+       .attr("class", "tooltipmap")
+       .style("opacity", 0);
+
+      // validacion para saber que tipo es y como se debe consultar
+      if (tipoDirectorio==false) {
+        datainf = response;
+        //saber el formato de los numeros
+        if(datainf[0]!=undefined){
+              if (datainf[0].Decimales_Despliegue >= 1)
+              format = d3.format(",." + datainf[0].Decimales_Despliegue + "f"); //con decimal
+            else
+              format = d3.format(",.0f"); //sin decimal
+        }
+        else
+        {
+          format = d3.format(",." + cantidadDecimales(datainf.valores[1].val) + "f");
+          datainf = response.valores;
+          tipoDirectorio=true;
+        }
+        
+      }
+      else {
+        datainf = response.valores;
+        format = d3.format(",.0f"); //sin decimal
+      }
+
+      dataEstrad3 = dataEstra;
+
+      rangeColores = rangeColores.filter(function (dato) {
+        return dato != undefined
+      });
+
+      heightLegend=rangeColores.length*25;
+
+      let all = getAll(tipoDirectorio, elm.anio,datainf);
+      let ordenar = all.sort(function (a, b) { return a - b });
+
+      if (escala != "4") {
+        color = d3.scaleQuantize()
+         .range(rangeColores);
+
+         color.domain([Math.min.apply(Math, all), Math.max.apply(Math, all)]); // setting the range of the input data
+     }
+     else {
+       let colorq= [];
+       for (let co=0;co<escala;co++){
+         colorq[co]=rangeColores[co];
+         }
+        color = d3.scaleQuantile()
+         .domain(ordenar)
+         .range(colorq);
+          // setting the range of the input data;
+     }
+
+
+      d3.json('/componentes/mapad3/data/estados.json', function (error, data) {
+        if (error) throw error;
+         states = topojson.feature(data, data.objects.salida);
+
+        let b, s, t;
+        projection.scale(1).translate([0, 0]);
+         b = path.bounds(states);
+         s = .9 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+         t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+        projection.scale(s).translate(t);
+        //LOOP API JSON
+
+        for (let i = 0; i < datainf.length; i++) {
+          if (!tipoDirectorio) {
+            let objdato;
+            if (elm.anio == null)
+              objdato = datainf[i].Valores;
+            else
+              objdato = $.grep(datainf[i].Valores, function (ex) { return ex.Periodo == elm.anio; });
+            try {
+              valor_ = quitarcomas(objdato[0].Valor);
+            } catch (error) {
+              valor_ = 0;
+              console.log("crearmapad3" + objdato[0]+ error);
+            }
+      
+              nom_estado = datainf[i].Entidad.toString();
+              if (nom_estado.length != 1) {
+                if (nom_estado.startsWith("0"))
+                  nom_estado = nom_estado.substring(1);
+              }
+          }
+          else {
+            valor_ = quitarcomas(datainf[i].val);
+            nom_estado = datainf[i].id;
+          }
+
+          if (nom_estado != 0 ||nom_estado != '00') {
+            let estrat;
+            // Find the corresponding state inside the GeoJSON
+            for (let j = 0; j < data.objects.salida.geometries.length; j++) {
+              let jsonState = data.objects.salida.geometries[j].properties.NOMGEO;
+              switch (jsonState) {
+                case "Distrito Federal":
+                  jsonState = "Ciudad de México";
+                  break;
+                case "Veracruz":
+                  jsonState = "Veracruz de Ignacio de la Llave";
+                  break;
+                case "Coahuila":
+                  jsonState = "Coahuila de Zaragoza";
+                  break;
+                case "Michoacán":
+                  jsonState = "Michoacán de Ocampo";
+                  break;
+              }
+                if (nom_estado == data.objects.salida.geometries[j].properties.OID) {
+                  // Copy the data value into the JSON
+                  data.objects.salida.geometries[j].properties.establecimientos= Number(valor_);
+                  data.objects.salida.geometries[j].properties.colorr = elm.municipios[nom_estado].color;
+                if(bceros&&bextremosar){
+                    if(elm.municipios[nom_estado].estrato=="extremosar")
+                      data.objects.salida.geometries[j].properties.estrator=dataEstrad3.length-1;
+                    else if (elm.municipios[nom_estado].estrato=="ceros")
+                      data.objects.salida.geometries[j].properties.estrator=0;
+                    else
+                      data.objects.salida.geometries[j].properties.estrator=elm.municipios[nom_estado].estrato;
+                }else
+                  data.objects.salida.geometries[j].properties.estrator = estratoCasoEspecial(bextremosab,bextremosar,elm.municipios[nom_estado].estrato,dataEstrad3);
+  
+  
+                  if(D3parametros.colores==''){
+                    data.objects.salida.geometries[j].properties.colorr = elm.municipios[nom_estado].color;
+                  }
+                  else{
+                    if(bceros&&bextremosar){
+                      if(elm.municipios[nom_estado].estrato=="ceros")
+                        data.objects.salida.geometries[j].properties.colorr=rangeColores[0];
+                      else
+                      data.objects.salida.geometries[j].properties.colorr=elm.municipios[nom_estado].color;
+                    }else
+                      data.objects.salida.geometries[j].properties.colorr = rangeColores[estratoCasoEspecial(bextremosab,bextremosar,elm.municipios[nom_estado].estrato,dataEstrad3)-1];
+                  }
+                  // Stop looking through the JSON
+                  break;
+                }
+            }
+          }
+        }
+        
+     
+        // MAP
+
+        if(D3parametros.etiqueta=='fija'){
+          g=  svg.append('g')
+           .selectAll('path')
+           .data(states.features)
+           .enter()
+           .append('path')
+           .attr("d", path)
+           .attr("class", "feature")
+           .on("click", clicked)
+           .attr("id", "svg_"+ elm.id)
+           .style("stroke-width", 1)
+           .style("fill", function (d) {
+             let colorp;
+             // Get data value
+             let value = d.properties.establecimientos;
+             //llenamos los rangos
+             if (value != undefined) {
+               if(!isNaN(value)){
+                 colorp =banderaAPI?d.properties.colorr:color(value);
+                 mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color = colorp;
+                 return colorp;
+               }
+               else{
+                 return "#ccc";
+               }
+               
+             } else {
+               //If value is undefined…
+               return "#ccc";
+             }
+           });
+
+           svg.selectAll(".place-label")
+            .data(states.features)
+            .enter().append("text")
+            .attr("dy", ".35em")
+            .attr("dx", "-1.2em")
+            .style("stroke-width", 1)
+            .style("text-anchor", 'end')
+            .attr("class", "featureTxt")
+            .attr("transform", function(d) {
+            if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                 return "translate(" + path.centroid(d) + ")"; 
+                }
+              }
+            })
+            .attr("dy", ".35em")
+            .attr("dx", ".65em")
+            .text(function(d) { 
+            let txt;
+            if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  txt=d.properties.NOMGEO + "\n"  + format(d.properties.establecimientos);
+                }
+              }
+            return txt; 
+          });
+
+          g.append("path")
+          .datum(topojson.mesh(data, data .objects.salida, function (a, b) { return a !== b; }))
+          .attr("class", "mesh")
+          .attr("d", path);
+        }
+        else{
+          g=  svg.append('g')
+            .selectAll("path")
+            .data(states.features)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("class", "feature")
+            .on("click", clicked)
+            .style('transition', "all 0.2s ease-in-out")
+            .style("stroke", "#ffffff")
+            .attr("id", "svg_"+ elm.id)
+            .style("stroke-width", 1)
+            .style("fill", function (d) {
+              let colorp;
+              // Get data value
+              let value = d.properties.establecimientos;
+              //llenamos los rangos
+              if (value != undefined) {
+                if(!isNaN(value)){
+                  colorp=  banderaAPI?d.properties.colorr:color(value);
+                  mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color = colorp;
+                  return colorp;
+                }
+                else{
+                  return "#ccc";
+                }
+                
+              } else {
+                //If value is undefined…
+                return "#ccc";
+              }
+            })
+            .on('mousemove', function (d) {
+              calcularTop(elm,tipoTematico,tipoDirectorio);
+              let left = d3.event.pageX - $('#' + elm.id).offset().left;
+              let top = d3.event.pageY - $('#' + elm.id).offset().top;
+              let txtlegend;
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  txtlegend = format(d.properties.establecimientos);
+                }
+                else
+                txtlegend = "No disponible";
+              }
+              else
+                txtlegend = "No disponible";
+    
+                tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+    
+                if(tipoDirectorio||tipoTematico){
+                  if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                      left=left+40;
+                  tooltip.style("left", (left+35) + "px")
+                  .style("top", (top+tooltipTop) + "px")
+                  .text(d.properties.NOMGEO + ': ' + txtlegend)
+                }
+                else{
+                  if((elm.id).indexOf('tab')!=-1)
+                    left=left +40;
+                  tooltip.style("left", (left+25) + "px")
+                  .style("top", (top+tooltipTop) + "px")
+                  .text(d.properties.NOMGEO + ': ' + txtlegend)
+                }
+            })
+            .on("mouseover", function (d) {
+              let colorP=  banderaAPI?d.properties.colorr:color(d.properties.establecimientos);
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  d3.select(this)
+                  .style("fill", tinycolor(colorP).darken(15).toString())
+                  .style("cursor", "pointer");
+                }   
+              }
+            })
+            .on("mouseout", function (d, i) {
+              let colorP=  banderaAPI?d.properties.colorr:color(d.properties.establecimientos);
+              d3.select(this).style("fill", function () {
+                if (d.properties.establecimientos != undefined){
+                  if(!isNaN(d.properties.establecimientos)){
+                    let uRate = colorP;
+                    return uRate ? uRate : uRate;
+                  }
+                  else{
+                    return "#ccc";
+                  }
+                }
+              });
+    
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            });
+            
+            
+            g.append("path")
+            .datum(topojson.mesh(data, data .objects.salida, function (a, b) { return a !== b; }))
+            .attr("class", "mesh")
+            .attr("d", path);
+          
+        }
+
+        
+                          //TITULO DE LAS LEYENDAS(ESTRATIFICACION)
+        d3.select("#objMapa_" + elm.id).append("div")
+        .attr("id", "legTitle" + elm.id)
+        .attr("style", "position: relative;padding: 4px;font-size:13px")
+        .append("text")
+        .text(elm.unidadMedida);
+
+        legend = d3.select("#objMapa_" + elm.id).append("svg")
+          .attr("id", "estMapa_" + elm.id)
+          .attr("height", heightLegend)
+          .attr("class", "legend")
+          .selectAll("g")
+          .data(color.range())
+          .enter()
+          .append("g")
+          .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+          .on("click", function (d, i) {
+            
+            // clicking an active entry: reset
+            if (highlighted == d) {
+              g.style("opacity", 1);
+
+              legend.selectAll("rect")
+                .style("class", function (d) { return d; });
+
+              highlighted = ""; // rest
+            }
+            else {
+              highlighted = d;
+              
+              g.style("opacity", 0.2)
+                .filter(function (f) {
+                  let colorP=  banderaAPI?f.properties.colorr:color(f.properties.establecimientos);
+                  return colorP == d
+                })
+                .style("opacity", 1);
+
+
+              // set legend:
+              legend.selectAll("rect")
+                .style("class", "white");
+
+              d3.select(this).select("rect")
+                .style("fill", function (d) { return d; });
+            }
+
+          })
+          .call(responsiveLegend);
+      
+      legend.append("rect")
+        .attr("width", 18)
+        .attr("height", 15)
+        .style("fill", function (d) {
+          return d;
+        })
+        .style("cursor", "pointer");
+      legend.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function (d, i) {
+          let extent = color.invertExtent(d);
+          let t = "";
+          if(banderaAPI){
+            if (i == 0) {
+              if (encDomIng)
+                t = "from " + format(dataEstrad3[i].limInferior) + " to " + format(dataEstrad3[i].limSuperior);
+              else
+                t = "de " + format(dataEstrad3[i].limInferior) + " a " + format(dataEstrad3[i].limSuperior);
+            }
+            else {
+              if (encDomIng)
+                t = "more than " + format(dataEstrad3[i].limInferior) + " to " + format(dataEstrad3[i].limSuperior);
+              else
+                t = "más de " + format(dataEstrad3[i].limInferior) + " a " + format(dataEstrad3[i].limSuperior);
+            }
+          }else{
+            if (escala=='4'){
+              if (encDomIng)
+                t = "from " + format(extent[0]) + " to " + format(+extent[1]);
+              else
+                t = "de " + format(extent[0]) + " a " + format(+extent[1]);
+            }
+            else{
+              if (encDomIng)
+                t = "from " + format(extent[0]) + " less than " + format(+extent[1]);
+              else
+                t = "de " + format(extent[0]) + " a menos de  " + format(+extent[1]);
+            }
+          }
+  
+          //extent will be a two-element array, format it however you want:
+          return t
+        });
+        let highlighted = "";
+
+        paletasColores(paleta1,'1',D3parametros.estratoslim,D3parametros.idioma,elm, g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta2,'2',D3parametros.estratoslim,D3parametros.idioma,elm, g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta3,'3',D3parametros.estratoslim,D3parametros.idioma,elm, g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta4,'4',D3parametros.estratoslim,D3parametros.idioma,elm, g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+
+          calcularTopLegend(elm,tipoDirectorio);
+
+
+
+        if(D3parametros!=undefined)
+          addNotasFuente(encDomIng, elm, D3parametros.notasAdd, fuenteAdi);
+
+
+      });
+
+      const mapasReplica= [...mapasTemObj_D3[contmap]["municipios"]];
+
+      function clicked(d) { 
+        mapasTemObj_D3[contmap]["municipios"]="";
+        d3.selectAll(".subdivision").remove();
+        d3.selectAll(".featureTxt").remove();
+        g
+        .style("fill", function (d) {
+          return "#ccc";
+        })
+        .on('mousemove', function (d) {            
+        })
+        .on("mouseover", function (d) {         
+        })
+        .on("mouseout", function (d, i) {  
+        });
+
+       if (active.node() === this) return reset(d);
+        active.classed("active", true);
+        active = d3.select(this).classed("active", false);
+        let bounds = path.bounds(d),
+            dx = bounds[1][0] - bounds[0][0],
+            dy = bounds[1][1] - bounds[0][1],
+            x = (bounds[0][0] + bounds[1][0]) / 2,
+            y = (bounds[0][1] + bounds[1][1]) / 2,
+            scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
+            translate = [width / 2 - scale * x, height / 2 - scale * y];
+            drawmunicipios(d,translate,scale,estrato,elm);
+
+        svg.transition()
+            .duration(250)
+            .call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+            
+      }
+      
+       function drawmunicipios(obj,translate,scale,estrato,elm){ 
+        bextremosarMun=false;
+        bextremosabMun=false;
+        bcerosMun=false;
+        document.getElementById('btnVista' + elm.id).style.display = 'inline-block';
+        let  dataMun = D3parametros.dataMun; 
+        let vctKD = new Array();   
+        let estratoApi; 
+
+        if(estrato===3){
+          estratoApi=1;
+        } 
+        else
+        {
+          estratoApi=estrato;
+        }   
+        d3.json("/componentes/mapad3/data/municipios.json", async function (error, subdivisions) {
+            if (error) throw error;
+            let municipalities=topojson.feature(subdivisions, subdivisions.objects.salida);           
+             filtrodataMun=dataMun.filter(dataMun => dataMun.Entidad === obj.properties.CVE_ENT);
+            for (let i = 0; i < filtrodataMun.length; i++) {
+                if (!isNaN((filtrodataMun[i].Valores[0].Valor).replace(/,/g, ''))) {
+                    vctKD.push(parseFloat((filtrodataMun[i].Valores[0].Valor).replace(/,/g, '')));
+                }
+            }
+            const estratosMun=  await getJsonEstratoMun(estratoApi,vctKD);
+            dataEstrad3Mun=estratosMun;
+            if(estrato==='1'||estrato==='2'){
+              banderaAPI=true;
+              for (let e = 0; e < dataEstrad3Mun.length; e++) {
+                if(dataEstrad3Mun[e].nestrato=='extremosar')
+                   bextremosarMun = true;
+               if(dataEstrad3Mun[e].nestrato=='extremosab')
+                   bextremosabMun =true;
+               if(dataEstrad3Mun[e].nestrato=='ceros')
+                  bcerosMun =true;   
+             }
+            }
+             jsonRes= updateMun(filtrodataMun,estratosMun,elm);
+             let coloresEleg=coloresReales(elm.id,jsonRes.coloresMun,dataEstrad3Mun);
+            updateEstratificacion(estrato, vctKD ,color,coloresEleg);
+            featuresmun = municipalities.features.filter(function (feature) { 
+              if(feature.properties.CVE_ENT == obj.properties.CVE_ENT){            
+                return  true;
+              }
+            });
+            for (let i = 0; i < filtrodataMun.length; i++) {
+              let objdato;
+                objdato = filtrodataMun[i].Valores;
+              try {
+                valor_ = quitarcomas(objdato[0].Valor);
+              } catch (error) {
+                valor_ = 0;
+                console.log("crearmapad3" + objdato[0]+ error);
+              }
+              nom_estado = filtrodataMun[i].Entidad;
+              cve_mun=filtrodataMun[i].Municipio;
+  
+              if (nom_estado != 0 ||nom_estado != '00') {
+              // Find the corresponding state inside the GeoJSON
+              let cont_mun=cve_mun;
+              if (cont_mun.length != 1) {
+                if (cont_mun.startsWith("0"))
+                cont_mun = cont_mun.substring(1);
+                    if(cont_mun.startsWith("0"))
+                    cont_mun = cont_mun.substring(1);
+                    cont_mun--;
+              }
+              
+              if(jsonRes.elementos[cont_mun]!=undefined) {
+                for (let j = 0; j < featuresmun.length; j++) {
+  
+                  if (cve_mun == featuresmun[j].properties.CVE_MUN) {
+                  // Copy the data value into the JSON
+                  
+                  featuresmun[j].properties.establecimientos= Number(valor_);
+                  featuresmun[j].properties.colorr = jsonRes.elementos[cont_mun].color;
+                  if(bcerosMun&&bextremosarMun){
+                    if(jsonRes.elementos[cont_mun].estrato=="extremosar")
+                      featuresmun[j].properties.estrator=dataEstrad3Mun.length-1;
+                    else if (jsonRes.elementos[cont_mun].estrato=="ceros")
+                      featuresmun[j].properties.estrator=0;
+                    else
+                      featuresmun[j].properties.estrator=jsonRes.elementos[cont_mun].estrato;
+                }else
+                  featuresmun[j].properties.estrator = estratoCasoEspecial(bextremosabMun,bextremosarMun,jsonRes.elementos[cont_mun].estrato,dataEstrad3Mun);
+  
+  
+                  if(D3parametros.colores==''){
+                    featuresmun[j].properties.colorr = jsonRes.elementos[cont_mun].color;
+                  }
+                  else{
+                    if(bcerosMun&&bextremosarMun){
+                      if(jsonRes.elementos[cont_mun].estrato=="ceros")
+                        featuresmun[j].properties.colorr=coloresEleg[0];
+                      else
+                        featuresmun[j].properties.colorr=jsonRes.elementos[cont_mun].color;
+                    }else
+                      featuresmun[j].properties.colorr = coloresEleg[estratoCasoEspecial(bextremosabMun,bextremosarMun,jsonRes.elementos[cont_mun].estrato,dataEstrad3Mun)-1];
+                  }
+                  // Stop looking through the JSON
+                  break;
+                  }
+              }
+              }
+
+             
+            }
+          }
+          if(D3parametros.etiqueta=='fija'){
+              gMun= svg.append('g')
+              .selectAll('null')
+              .data(featuresmun)
+              .enter()
+              .append("path")
+              .attr("class", "subdivision")
+              .attr("d", path)
+              .style("fill", function (d,i ) {
+                // Get data value
+                let value = d.properties.establecimientos;
+                
+                //llenamos los rangos
+                if (value != undefined) {
+                  if(!isNaN(value)){
+                    let cont=d.properties.CVE_MUN;
+                    if (cont.length != 1) {
+                      if (cont.startsWith("0"))
+                          cont = cont.substring(1);
+                          if(cont.startsWith("0"))
+                            cont = cont.substring(1);
+                      cont--;
+                    }
+                    let colorp=  banderaAPI?d.properties.colorr:color(value);
+                    mapasTemObj_D3[contmap]["municipiosR"][cont].color = colorp;
+                    return colorp;
+                  }
+                  else{
+                    return "#ccc";
+                  }
+                  
+                } else {
+                  //If value is undefined…
+                  return "#ccc";
+                }
+              });
+
+              updateCentroidtxt();
+
+          }else{
+            gMun= svg.append('g')
+            .selectAll('null')
+            .data(featuresmun)
+            .enter()
+            .append("path")
+            .attr("class", "subdivision")
+            .attr("d", path)
+            .style("fill", function (d,i ) {
+              // Get data value
+              let value = d.properties.establecimientos;
+              
+              //llenamos los rangos
+              if (value != undefined) {
+                if(!isNaN(value)){
+                  let cont=d.properties.CVE_MUN;
+                  if (cont.length != 1) {
+                    if (cont.startsWith("0"))
+                        cont = cont.substring(1);
+                        if(cont.startsWith("0"))
+                          cont = cont.substring(1);
+                    cont--;
+                  }
+                  let colorp=  banderaAPI?d.properties.colorr:color(value);
+                  mapasTemObj_D3[contmap]["municipiosR"][cont].color = colorp;
+                  return colorp;
+                }
+                else{
+                  return "#ccc";
+                }
+                
+              } else {
+                //If value is undefined…
+                return "#ccc";
+              }
+             })
+             .on('mousemove', function (d) {
+              calcularTop(elm,false,false)
+              let left = d3.event.pageX - $('#' + elm.id).offset().left;
+              let top = d3.event.pageY - $('#' + elm.id).offset().top;
+              let txtlegend;
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  txtlegend = format(d.properties.establecimientos);
+                }
+                else
+                txtlegend = "No disponible";
+              }
+              else
+                txtlegend = "No disponible";
+              tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+  
+              tooltip.style("left", (left+55) + "px")
+              .style("top", (tooltipTop+top) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            
+            })
+            .on("mouseover", function (d) {
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  let colorP=  banderaAPI?d.properties.colorr:color(d.properties.establecimientos);
+                  d3.select(this)
+                  .style("fill", tinycolor(colorP).darken(15).toString())
+                  .style("cursor", "pointer");
+                }
+              }
+            })
+            .on("mouseout", function (d, i) {
+              d3.select(this).style("fill", function () {
+                if (d.properties.establecimientos != undefined){
+                  if(!isNaN(d.properties.establecimientos)){ 
+                    let uRate = banderaAPI?d.properties.colorr:color(d.properties.establecimientos);
+                    return uRate;
+                  }
+                  else{                    
+                      return "#ccc";
+                  }             
+                }
+              });
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            });
+          }
+  
+           
+           
+          updateLegend ("estMapa_" + elm.id,estrato, dataEstrad3Mun,color,legend,gMun,coloresEleg,bcerosMun);
+          gMun.transition()
+          .duration(250)
+         .attr("transform", d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+           
+        });
+      }
+      
+      document.getElementById('btnVista'+elm.id).onclick = reset;
+
+      function reset() {
+        mapasTemObj_D3[contmap]["municipios"]=mapasReplica;
+        mapasTemObj_D3[contmap]["municipiosR"]='';
+        // remove all other subdivisions:
+        d3.selectAll(".subdivision").remove();
+        d3.selectAll(".subdivisionTxt").remove();
+        let coloresEleg=coloresReales(elm.id,rangeColores,dataEstrad3);
+        updateEstratificacion(estrato, all ,color,coloresEleg);
+
+        if(D3parametros.etiqueta=='fija'){
+          g.style("fill", function (d) {
+            let colorp;
+            // Get data value
+            let value = d.properties.establecimientos;
+            //llenamos los rangos
+            if (value != undefined) {
+              if(!isNaN(value)){
+                colorp =banderaAPI?d.properties.colorr:color(value);
+                mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color = colorp;
+                return colorp;
+              }
+              else{
+                return "#ccc";
+              }
+              
+            } else {
+              //If value is undefined…
+              return "#ccc";
+            }
+          });
+          
+          svg.selectAll(".place-label")
+          .data(states.features)
+          .enter().append("text")
+          .attr("dy", ".35em")
+          .attr("dx", "-1.2em")
+          .style("stroke-width", 1)
+          .style("text-anchor", 'end')
+          .attr("class", "featureTxt")
+          .attr("transform", function(d) {
+          if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+               return "translate(" + path.centroid(d) + ")"; 
+              }
+            }
+          })
+          .attr("dy", ".35em")
+          .attr("dx", ".65em")
+          .text(function(d) { 
+          let txt;
+          if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                txt=d.properties.NOMGEO + "\n"  + format(d.properties.establecimientos);
+              }
+            }
+          return txt; 
+        });
+
+        }else{
+          g
+          .style("fill", function (d) {
+            let colorp;
+            // Get data value
+            let value = d.properties.establecimientos;
+            //llenamos los rangos
+            if (value != undefined) {
+              if(!isNaN(value)){
+                if(banderaAPI){
+                  if(bceros)
+                    colorp = coloresEleg[d.properties.estrator];
+                  else
+                    colorp = coloresEleg[d.properties.estrator-1];
+                }else{
+                  colorp=color(value);
+                }
+                mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color = colorp;
+                return colorp;
+              }
+              else{
+                return "#ccc";
+              }
+              
+            } else {
+              //If value is undefined…
+              return "#ccc";
+            }
+          })
+          .on('mousemove', function (d) {
+            calcularTop(elm,tipoTematico,tipoDirectorio);
+            let left = d3.event.pageX - $('#' + elm.id).offset().left;
+            let top = d3.event.pageY - $('#' + elm.id).offset().top;
+            let txtlegend;
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                txtlegend = format(d.properties.establecimientos);
+              }
+              else
+              txtlegend = "No disponible";
+            }
+            else
+              txtlegend = "No disponible";
+  
+              tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+  
+              if(tipoDirectorio||tipoTematico){
+                if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                    left=left+40;
+                tooltip.style("left", (left+35) + "px")
+                .style("top", (top+tooltipTop) + "px")
+                .text(d.properties.NOMGEO + ': ' + txtlegend)
+              }
+              else{
+                if((elm.id).indexOf('tab')!=-1)
+                  left=left +40;
+                tooltip.style("left", (left+25) + "px")
+                .style("top", (top+tooltipTop) + "px")
+                .text(d.properties.NOMGEO + ': ' + txtlegend)
+              }
+          })
+          .on("mouseover", function (d) {
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                let colorP;
+                if(banderaAPI){
+                  if(bceros)
+                    colorP = coloresEleg[d.properties.estrator];
+                  else
+                    colorP = coloresEleg[d.properties.estrator-1];
+                }else{
+                  colorP=color((d.properties.establecimientos));
+                }
+                d3.select(this)
+                .style("fill", tinycolor(colorP).darken(15).toString())
+                .style("cursor", "pointer");
+              }   
+            }
+          })
+          .on("mouseout", function (d, i) {
+            d3.select(this).style("fill", function () {
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  let colorP;
+                  if(banderaAPI){
+                    if(bceros)
+                      colorP = coloresEleg[d.properties.estrator];
+                    else
+                      colorP = coloresEleg[d.properties.estrator-1];
+                  }else{
+                    colorP=color((d.properties.establecimientos));
+                  }
+                  let uRate = colorP;
+                  return uRate ? uRate : uRate;
+                }
+                else{                    
+                  return "#ccc";
+              } 
+              }
+            });
+  
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+        }
+      
+        updateLegend("estMapa_" + elm.id,estrato, dataEstrad3,color,legend,g,coloresEleg,bceros);
+
+        active.classed("active", false);
+        active = d3.select(null);
+        svg.transition()
+            .duration(250)
+            .call(zoom.transform, d3.zoomIdentity); // updated for d3 v4
+        
+            document.getElementById('btnVista' + elm.id).style.display = 'none';
+
+      }
+      
+      function updateCentroidtxt (){
+            svg.selectAll(".place-label")
+            .data(featuresmun)
+            .enter().append("text")
+            .attr("dy", ".35em")
+            .attr("dx", "-1.2em")
+            .style("stroke-width", 1)
+            .style("text-anchor", 'end')
+            .attr("class", "subdivisionTxt")
+            .attr("transform", function(d) {
+            if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                return "translate(" + path.centroid(d)+ ")"; 
+                }
+              }
+            })
+            .attr("dy", ".35em")
+            .attr("dx", ".65em")
+            .text(function(d) { 
+            let txt;
+            if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  txt=d.properties.NOMGEO + "\n"  + format(d.properties.establecimientos);
+                }
+              }
+            return txt; 
+          });
+
+      }
+
+      function zoomed() {
+        g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
+        g.attr("transform", d3.event.transform); // updated for d3 v4
+      }
+
+
+      function stopped() {
+        if (d3.event.defaultPrevented) d3.event.stopPropagation();
+      }
+    
+  
+}
+
+function crearmapad3(D3parametros) {
+  const tipoMundi=false;
+  let tipoDirectorio=false;
+  let datainf;
+  let cobertura=D3parametros.cobertura;
+  let tipoTematico=false;
+  let color;
+  let svg;
+  let heightLegend;
+  let rangeColores =[];
+  response = D3parametros.informacion;
+  let elm = D3parametros.objeto;
+  encDomIng = D3parametros.idioma;
+  dataEstra = D3parametros.estratoslim;
+
+  let division;
+
+  if(cobertura==='est'){
+    division='estados';
+  }
+  else{
+    division='municipios';
+  }
+
+
+  if(elm.colorfijo){
+    for(let co=0;co<dataEstra.length;co++){
+      if(D3parametros.colores[co]==undefined){
+        rangeColores[co]='#000';
+        console.log("PRECAUCIÓN: No mandaste la cantidad adecauda de colores fijos acorde a los estratos");}
+      else
+        rangeColores[co]=D3parametros.colores[co];
+  }
+  }
+  else{
+      for(let co=0;co<dataEstra.length;co++){
+        rangeColores[co]=D3parametros.colores[co];
+    } 
+  }
+
+   
+
+
+  let contmap=0;
+  for(let t=0;t<mapasTemObj_D3.length;t++){
+      if(elm.id==mapasTemObj_D3[t].id)
+        contmap=t;
+  }
+
+  fuenteAdi = D3parametros.fuentesAdd;
+  escala = D3parametros.estra;
+
+
+    dataEstrad3 = [];
+    idelm = elm.id;
+    if (elm.id.includes("mapaTematico")) {
+      tipoTematico=true;
+      if(elm.id=="mapaTematico")
+        tipoDirectorio = true;
+      validaind = true;
+      if (trident > 0 || edge > 0) 
+        topLegend=410;
+      else
+        topLegend=130;
+    }
+    else {
+      if (trident > 0 || edge > 0) 
+      topLegend=655;
+      else
+        topLegend=345;
+      if (response == undefined)
+        validaind = false;
+      else if (response[0] == undefined)
+        validaind = true;
+      else if (response[0].Indicador != elm.indicador)
+        validaind = false;
+      else
+        validaind = true;
+    }
+
+    calcularTop(elm,tipoTematico,tipoDirectorio);
+
+
+    let elmObj = cr_elem_D3('div', '', { 'id': 'objMapa_' + elm.id,'style': 'min-height:350px'}, '');
+    let elemento = document.getElementById(elm.id);
+    elemento.appendChild(elmObj);
+
+    let nom_estado,cve_mun;
+    let valor_;
+
+    let height;
+    
+    let width = $('#' + elm.id).innerWidth();
+    let projection = d3.geoAlbers();
+    let color_;
+    //proyeccion
+    let path = d3.geoPath().projection(projection);
+
+    if (screen.width <= 500) 
+      height = $('#objMapa_' + elm.id).innerHeight();
+    else
+      height = $('#' + elm.id).innerHeight();
+
+
+    //creamos contenedor
+     svg = d3.select("#objMapa_" + elm.id).append("svg")
+      .attr("id", "Capa_1"+ elm.id)
+      .attr("width", width)
+      .attr("height", height)
+      .call(responsivefy);
+    
+
+
+
+    let tooltip = d3.select("#objMapa_" + elm.id).append("div")
+       .attr("id", "tooltipmap"+ elm.id)
+      .attr("class", "tooltipmap")
+      .style("opacity", 0);
+
+
+    //si trae información se pinta normal
+    if (validaind) {
+
+      // validacion para saber que tipo es y como se debe consultar
+      if (tipoDirectorio==false) {
+        datainf = response;
+        //saber el formato de los numeros
+        if(datainf[0]!=undefined){
+              if (datainf[0].Decimales_Despliegue >= 1)
+              format = d3.format(",." + datainf[0].Decimales_Despliegue + "f"); //con decimal
+            else
+              format = d3.format(",.0f"); //sin decimal
+        }
+        else
+        {
+          format = d3.format(",." + cantidadDecimales(datainf.valores[1].val) + "f");
+          datainf = response.valores;
+          tipoDirectorio=true;
+        }
+        
+      }
+      else {
+        datainf = response.valores;
+        format = d3.format(",.0f"); //sin decimal
+      }
+
+      dataEstrad3 = dataEstra;
+
+      rangeColores = rangeColores.filter(function (dato) {
+        return dato != undefined
+      });
+
+      heightLegend=rangeColores.length*25;
+
+      let all = getAll(tipoDirectorio, elm.anio,datainf);
+      let ordenar = all.sort(function (a, b) { return a - b });
+
+      if (escala == "3") {
+         color = d3.scaleQuantize()
+        .domain([Math.min.apply(Math, all), Math.max.apply(Math, all)]) // setting the range of the input data
+          .range(rangeColores);
+      }
+      else {
+        let colorq= [];
+        for (let co=0;co<escala;co++){
+          colorq[co]=rangeColores[co];
+          }
+         color = d3.scaleQuantile()
+          .domain(ordenar)
+          .range(colorq);
+           // setting the range of the input data;
+      }
+
+
+
+      d3.json('/componentes/mapad3/data/'+division+'.json', function (error, data) {
+        if (error) throw error;
+        let states = topojson.feature(data, data.objects.salida);
+
+        let b, s, t;
+        projection.scale(1).translate([0, 0]);
+         b = path.bounds(states);
+         s = .9 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+         t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+        projection.scale(s).translate(t);
+        //LOOP API JSON
+
+
+        for (let i = 0; i < datainf.length; i++) {
+          if (!tipoDirectorio) {
+            let objdato;
+            if (elm.anio == null)
+              objdato = datainf[i].Valores;
+            else
+              objdato = $.grep(datainf[i].Valores, function (ex) { return ex.Periodo == elm.anio; });
+            try {
+              valor_ = quitarcomas(objdato[0].Valor);
+            } catch (error) {
+              valor_ = 0;
+              console.log("crearmapad3" + objdato[0]+ error);
+            }
+            if(cobertura==='mun'){
+              nom_estado = datainf[i].Entidad.toString();
+              cve_mun=datainf[i].Municipio;
+  
+            }
+            else{
+              nom_estado = datainf[i].Entidad.toString();
+              if (nom_estado.length != 1) {
+                if (nom_estado.startsWith("0"))
+                  nom_estado = nom_estado.substring(1);
+              }
+            }
+      
+          }
+          else {
+            valor_ = quitarcomas(datainf[i].val);
+            nom_estado = datainf[i].id;
+          }
+
+          if (nom_estado != 0 ||nom_estado != '00') {
+            let estrat;
+            // Find the corresponding state inside the GeoJSON
+            for (let j = 0; j < data.objects.salida.geometries.length; j++) {
+              let jsonState = data.objects.salida.geometries[j].properties.NOMGEO;
+              switch (jsonState) {
+                case "Distrito Federal":
+                  jsonState = "Ciudad de México";
+                  break;
+                case "Veracruz":
+                  jsonState = "Veracruz de Ignacio de la Llave";
+                  break;
+                case "Coahuila":
+                  jsonState = "Coahuila de Zaragoza";
+                  break;
+                case "Michoacán":
+                  jsonState = "Michoacán de Ocampo";
+                  break;
+              }
+
+              if(cobertura==='mun'){
+                if (cve_mun == data.objects.salida.geometries[j].properties.CVE_MUN && nom_estado == data.objects.salida.geometries[j].properties.CVE_ENT ) {
+                  // Copy the data value into the JSON
+                  data.objects.salida.geometries[j].properties.establecimientos= Number(valor_);
+                  // Stop looking through the JSON
+                  break;
+                }
+              }
+              else{
+                if (nom_estado == data.objects.salida.geometries[j].properties.OID) {
+                  // Copy the data value into the JSON
+                  data.objects.salida.geometries[j].properties.establecimientos= Number(valor_);
+                  data.objects.salida.geometries[j].properties.colorr = elm.municipios[nom_estado].color;
+                  // Stop looking through the JSON
+                  break;
+                }
+              }
+
+            }
+          }
+        }
+        // MAP
+        let g; 
+        if(D3parametros.etiqueta=='fija')
+            g= etiquetasFijas(svg,states,path,format,tipoMundi,contmap,color,elm,false);
+         else
+            g=etiquetasTooltip(svg,states,path,format,tooltip,elm,tipoMundi,contmap,color,false,tipoTematico,tipoDirectorio);
+
+                    //TITULO DE LAS LEYENDAS(ESTRATIFICACION)
+        d3.select("#objMapa_" + elm.id).append("div")
+          .attr("id", "legTitle" + elm.id)
+          .attr("style", "position: relative;padding: 4px;font-size:13px")
+          .append("text")
+          .text(elm.unidadMedida);
+
+         let legend = d3.select("#objMapa_" + elm.id).append("svg")
+            .attr("id", "estMapa_" + elm.id)
+            .attr("height", heightLegend)
+            .attr("class", "legend")
+            .selectAll("g")
+            .data(color.range())
+            .enter()
+            .append("g")
+            .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+            .on("click", function (d, i) {
+              // clicking an active entry: reset
+              if (highlighted == d) {
+                g.style("opacity", 1);
+
+                legend.selectAll("rect")
+                  .style("class", function (d) { return d; });
+
+                highlighted = ""; // rest
+              }
+              else {
+                highlighted = d;
+
+                g.style("opacity", 0.2)
+                  .filter(function (f) {
+                    return color(f.properties.establecimientos) == d
+                  })
+                  .style("opacity", 1);
+
+
+                // set legend:
+                legend.selectAll("rect")
+                  .style("class", "white");
+
+                d3.select(this).select("rect")
+                  .style("fill", function (d) { return d; });
+              }
+
+            })
+            .call(responsiveLegend);
+        
+        legend.append("rect")
+          .attr("width", 18)
+          .attr("height", 15)
+          .style("fill", function (d) {
+            return d;
+          })
+          .style("cursor", "pointer");
+        legend.append("text")
+          .attr("x", 24)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .text(function (d, i) {
+            let extent = color.invertExtent(d);
+            let t = "";
+            if (escala=='4'){
+              if (encDomIng)
+                t = "from " + format(extent[0]) + " to " + format(+extent[1]);
+              else
+                t = "de " + format(extent[0]) + " a " + format(+extent[1]);
+            }
+            else{
+              if (encDomIng)
+                t = "from " + format(extent[0]) + " less than " + format(+extent[1]);
+              else
+                t = "de " + format(extent[0]) + " a menos de  " + format(+extent[1]);
+            }
+            //extent will be a two-element array, format it however you want:
+            return t
+          });
+        let highlighted = "";
+        let fillcolor;
+
+
+
+          
+        paletasColores(paleta1,'1',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta2,'2',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta3,'3',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta4,'4',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        //paletasColores(paleta5,'5p',D3parametros.estratoslim);
+
+          calcularTopLegend(elm,tipoDirectorio);
+
+
+        if(D3parametros!=undefined)
+          addNotasFuente(encDomIng, elm, D3parametros.notasAdd, fuenteAdi);
+
+      });
+
+    }
+  
+}
+
+function crearmapad3conApis(D3parametros) {
+  const tipoMundi=false;
+  let tipoDirectorio=false;
+  let dataEstrad3 = [];
+  let heightLegend;
+  let datainf;
+  let tipoTematico=false;
+  let color;
+  let bextremosar=false, bextremosab=false,bceros=false;
+  let rangeColores =[];
+  response = D3parametros.informacion;
+  let elm = D3parametros.objeto;
+  encDomIng = D3parametros.idioma;
+  dataEstra = D3parametros.estratoslim;
+  fuenteAdi = D3parametros.fuentesAdd;
+  let lengColores;
+  let svg;
+
+  for (let e = 0; e < dataEstra.length; e++) {
+     if(dataEstra[e].nestrato=='extremosar')
+        bextremosar = true;
+    if(dataEstra[e].nestrato=='extremosab')
+        bextremosab =true;
+    if(dataEstra[e].nestrato=='ceros')
+      bceros =true;   
+  }
+
+    let  lengEstra=dataEstra.length;
+      
+
+  if(elm.colorfijo){
+    for(let co=0;co<lengEstra;co++){
+      if(D3parametros.colores[co]===undefined){
+        lengColores=D3parametros.colores.length-1;
+        if(lengColores===lengEstra){
+          lengEstra++;
+        }
+        else{
+          rangeColores[co]='#000';
+          console.log("PRECAUCIÓN: No mandaste la cantidad adecauda de colores fijos acorde a los estratos");
+        }
+      }
+      else{
+        rangeColores[co]=D3parametros.colores[co];
+      }
+    }
+  }
+  else{
+    for(let co=0;co<lengEstra;co++){
+      if(D3parametros.colores[co]===undefined){
+        lengEstra++;
+      }
+      else{
+        rangeColores[co]=D3parametros.colores[co];
+      }
+    }
+  }
+
+  heightLegend=dataEstra.length*25;
+
+  let contmap=0;
+  for(let t=0;t<mapasTemObj_D3.length;t++){
+      if(elm.id==mapasTemObj_D3[t].id)
+        contmap=t;
+  }
+
+   dataEstrad3 = [];
+  idelm = elm.id;
+  if (elm.id.includes("mapaTematico")) {
+    if (trident>0 || edge > 0)
+      topLegend=410;
+    else
+      topLegend=130;
+
+    tipoTematico=true;
+    if(elm.id=="mapaTematico"){
+      tipoDirectorio = true;
+      validaind = true;
+    }
+  }
+  else {
+    if (trident>0 || edge > 0)
+      topLegend=655;
+    else
+      topLegend=345;
+    tipoDirectorio = false;
+    if (response == undefined)
+      validaind = false;
+    else if (response[0] == undefined)
+      validaind = true;
+    else if (response[0].Indicador != elm.indicador)
+      validaind = false;
+    else
+      validaind = true;
+  }
+
+  calcularTop(elm,tipoTematico,tipoDirectorio);
+
+  let elmObj = cr_elem_D3('div', '', { 'id': 'objMapa_' + elm.id,'style':'min-height:350px'}, '');
+  let elemento = document.getElementById(elm.id);
+  elemento.appendChild(elmObj);
+
+  let nom_estado;
+  let valor_;
+  let height ;
+  let width = $('#' + elm.id).innerWidth();
+  let projection = d3.geoAlbers();
+  let color_;
+  //proyeccion
+  let path = d3.geoPath().projection(projection);
+
+  if (screen.width <= 500) 
+    height = $('#objMapa_' + elm.id).innerHeight();
+  else
+    height = $('#' + elm.id).innerHeight();
+  
+  //creamos contenedor
+   svg = d3.select("#objMapa_" + elm.id).append("svg")
+    .attr("id", "Capa_1"+ elm.id)
+    .attr("width", width)
+    .attr("height", height)
+    .call(responsivefy);
+
+  let tooltip = d3.select("#objMapa_" + elm.id).append("div")
+   .attr("id", "tooltipmap"+ elm.id)
+    .attr("class", "tooltipmap")
+    .style("opacity", 0);
+
+
+  //si trae información se pinta normal
+  if (validaind) {
+
+    // validacion para saber que tipo es y como se debe consultar
+    if (!tipoDirectorio) {
+      datainf = response;
+      //saber el formato de los numeros
+      if(datainf[0]!=undefined){
+        if (datainf[0].Decimales_Despliegue >= 1)
+          format = d3.format(",." + datainf[0].Decimales_Despliegue + "f"); //con decimal
+        else
+          format = d3.format(",.0f"); //sin decimal
+        }
+        else
+        {
+          format = d3.format(",." + cantidadDecimales(datainf.valores[1].val) + "f");
+          datainf = response.valores;
+          tipoDirectorio=true;
+        }
+    }
+    else {
+      datainf = response.valores;
+      format = d3.format(",.0f"); //sin decimal
+    }
+
+    dataEstrad3 = dataEstra;
+
+
+    rangeColores = rangeColores.filter(function (dato) {
+      return dato != undefined
+    });
+    //To help generate the scale, https://hihayk.github.io/scale/
+     color = d3.scaleQuantize()
+      .range(rangeColores);
+
+
+    let all = getAll( tipoDirectorio, elm.anio,datainf);
+    color.domain([Math.min.apply(Math, all), Math.max.apply(Math, all)]); // setting the range of the input data
+    d3.json('/componentes/mapad3/data/estados.json', function (error, data) {
+      if (error) throw error;
+       let states = topojson.feature(data, data.objects.salida);
+
+      let b, s, t;
+      projection.scale(1).translate([0, 0]);
+       b = path.bounds(states);
+       s = .9 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+       t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+      projection.scale(s).translate(t);
+      //LOOP API JSON
+
+
+      for (let i = 0; i < datainf.length; i++) {
+        if (!tipoDirectorio) {
+          let objdato;
+          if (elm.anio == null)
+            objdato = datainf[i].Valores;
+          else
+            objdato = $.grep(datainf[i].Valores, function (ex) { return ex.Periodo == elm.anio; });
+          try {
+            valor_ = quitarcomas(objdato[0].Valor);
+          } catch (error) {
+            valor_ = 0;
+            console.log("crearmapad3conApis" + objdato[0]+ error);
+          }
+          nom_estado = datainf[i].Entidad.toString();
+          if (nom_estado.length != 1) {
+            if (nom_estado.startsWith("0"))
+              nom_estado = nom_estado.substring(1);
+          }
+        }
+        else {
+          valor_ = quitarcomas(datainf[i].val);
+          nom_estado = datainf[i].id;
+        }
+
+        if (nom_estado != 0) {
+          let estrat;
+          // Find the corresponding state inside the GeoJSON
+          for (let j = 0; j < data.objects.salida.geometries.length; j++) {
+            let jsonState = data.objects.salida.geometries[j].properties.NOMGEO;
+            switch (jsonState) {
+              case "Distrito Federal":
+                jsonState = "Ciudad de México";
+                break;
+              case "Veracruz":
+                jsonState = "Veracruz de Ignacio de la Llave";
+                break;
+              case "Coahuila":
+                jsonState = "Coahuila de Zaragoza";
+                break;
+              case "Michoacán":
+                jsonState = "Michoacán de Ocampo";
+                break;
+            }
+
+            if (nom_estado == data.objects.salida.geometries[j].properties.OID) {
+              // Copy the data value into the JSON
+              data.objects.salida.geometries[j].properties.establecimientos = Number(valor_);
+             
+              if(bceros&&bextremosar){
+                  if(elm.municipios[nom_estado].estrato=="extremosar")
+                    data.objects.salida.geometries[j].properties.estrator=dataEstrad3.length-1;
+                  else if (elm.municipios[nom_estado].estrato=="ceros")
+                    data.objects.salida.geometries[j].properties.estrator=0;
+                  else
+                    data.objects.salida.geometries[j].properties.estrator=elm.municipios[nom_estado].estrato;
+              }else
+                data.objects.salida.geometries[j].properties.estrator = estratoCasoEspecial(bextremosab,bextremosar,elm.municipios[nom_estado].estrato,dataEstrad3);
+
+
+                if(D3parametros.colores==''){
+                  data.objects.salida.geometries[j].properties.colorr = elm.municipios[nom_estado].color;
+                }
+                else{
+                  if(bceros&&bextremosar){
+                    if(elm.municipios[nom_estado].estrato=="ceros")
+                      data.objects.salida.geometries[j].properties.colorr=rangeColores[0];
+                    else
+                    data.objects.salida.geometries[j].properties.colorr=elm.municipios[nom_estado].color;
+                  }else
+                    data.objects.salida.geometries[j].properties.colorr = rangeColores[estratoCasoEspecial(bextremosab,bextremosar,elm.municipios[nom_estado].estrato,dataEstrad3)-1];
+                }
+             
+              // Stop looking through the JSON
+              break;
+            }
+          }
+        }
+      }
+     // MAP
+let g;
+     if(D3parametros.etiqueta=='fija')
+         g= etiquetasFijas(svg,states,path,format,tipoMundi,contmap,color,elm,true);
+      else
+         g=etiquetasTooltip(svg,states,path,format,tooltip,elm,tipoMundi,contmap,color,true,tipoTematico,tipoDirectorio);
+
+
+             //TITULO DE LAS LEYENDAS(ESTRATIFICACION)
+      d3.select("#objMapa_" + elm.id).append("div")
+        .attr("id", "legTitle" + elm.id)
+        .attr("style", "position: relative;padding: 4px;font-size:13px")
+        .append("text")
+        .text(elm.unidadMedida);
+
+         let legend = d3.select("#objMapa_" + elm.id).append("svg")
+          .attr("id", "estMapa_" + elm.id)
+          .attr("class", "legend")
+          .attr("height", heightLegend)
+          .selectAll("g")
+          .data(color.range())
+          .enter()
+          .append("g")
+          .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+          .on("click", function (d, i) {
+            // clicking an active entry: reset
+            if (highlighted == d) {
+              g.style("opacity", 1);
+
+              legend.selectAll("rect")
+                .style("class", function (d) { return d; });
+
+              highlighted = ""; // rest
+            }
+            else {
+              highlighted = d;
+
+              g.style("opacity", 0.2)
+                .filter(function (f) {
+                  let p;
+                  if (f.properties.colorr == d)
+                    p = true;
+                  return p
+                })
+                .style("opacity", 1);
+
+
+              // set legend:
+              legend.selectAll("rect")
+                .style("class", "white");
+
+              d3.select(this).select("rect")
+                .style("fill", function (d) { return d; });
+            }
+
+          })
+          .call(responsiveLegend);
+      
+
+      legend.append("rect")
+        .attr("width", 18)
+        .attr("height", 15)
+        .style("fill", function (d) {
+          return d;
+        })
+        .style("cursor", "pointer");
+      legend.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function (d, i) {
+          let t = "";
+          if(elm.tipoEstratifica=='fijos'){
+            t=dataEstrad3[i].etiqueta;
+          }
+          else{
+            if (i == 0) {
+              if (encDomIng)
+                t = "from " + format(dataEstrad3[i].limInferior) + " to " + format(dataEstrad3[i].limSuperior);
+              else
+                t = "de " + format(dataEstrad3[i].limInferior) + " a " + format(dataEstrad3[i].limSuperior);
+            }
+            else {
+              if (encDomIng)
+                t = "more than " + format(dataEstrad3[i].limInferior) + " to " + format(dataEstrad3[i].limSuperior);
+              else
+                t = "más de " + format(dataEstrad3[i].limInferior) + " a " + format(dataEstrad3[i].limSuperior);
+            }
+          }
+          return t
+        });
+      let highlighted = "";
+      let fillcolor;
+
+
+
+        calcularTopLegend(elm,tipoDirectorio);
+
+
+        paletasColores(paleta1,'1',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta2,'2',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta3,'3',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        paletasColores(paleta4,'4',D3parametros.estratoslim,D3parametros.idioma,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+        //paletasColores(paleta5,'5p',D3parametros.estratoslim);
+  
+    //TODO: NO RECUERDO ESTA VALIDACION CUAL ERA EL FIN REVISARLO 
+    if(D3parametros!=undefined)
+        addNotasFuente(encDomIng, elm,D3parametros.notasAdd, fuenteAdi);
+      
+    });
+
+  }
+}
+
+function crearmapad3simplecontooltip(D3parametros) {
+  let tipoDirectorio=false;
+  let datainf;
+  let svg;
+  let tipoTematico=false;
+  response = D3parametros.informacion;
+ let elm = D3parametros.objeto;
+  idelm = elm.id;
+
+  if (elm.id.includes("mapaTematico")) {
+      tipoTematico=true;
+      if(elm.id=="mapaTematico"){
+        tipoDirectorio=true;
+        validaind = true;
+      }
+  }
+  else {
+    tipoDirectorio=false;
+    if (response == undefined)
+      validaind = false;
+    else if (response[0] == undefined)
+      validaind = true;
+    else if (response[0].Indicador != elm.indicador)
+      validaind = false;
+    else
+      validaind = true;
+  }
+
+  let elmObj = cr_elem_D3('div', '', { 'id': 'objMapa_' + elm.id }, '');
+  let elemento = document.getElementById(elm.id);
+  elemento.appendChild(elmObj);
+
+  let nom_estado;
+  let valor_;
+  let height = $('#' + elm.id).innerHeight();
+  let width = $('#' + elm.id).innerWidth();
+  let projection = d3.geoAlbers();
+  let color_;
+  let format; //con decimal
+
+  //proyeccion
+  let path = d3.geoPath().projection(projection);
+
+  //creamos contenedor
+   svg = d3.select("#objMapa_" + elm.id).append("svg")
+    .attr("id", "Capa_1"+ elm.id)
+    .attr("width", width)
+    .attr("height", height);
+
+  let tooltip = d3.select("#objMapa_" + elm.id).append("div")
+    .attr("id", "tooltipmap"+ elm.id)
+    .attr("class", "tooltipmap")
+    .style("opacity", 0);
+
+
+  // validacion para saber que tipo es y como se debe consultar
+  if (!tipoDirectorio) {
+    datainf = response;
+    format = d3.format(",.0f"); //sin decimal
+  }
+
+  d3.json('/componentes/mapad3/data/estados.json', function (error, data) {
+    if (error) throw error;
+    let states = topojson.feature(data, data.objects.salida);
+
+    let b, s, t;
+    projection.scale(1).translate([0, 0]);
+     b = path.bounds(states);
+     s = .9 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+     t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+    projection.scale(s).translate(t);
+    //LOOP API JSON
+    for (let i = 0; i < datainf.length; i++) {
+      if (!tipoDirectorio) {
+        let objdato;
+        if (elm.anio == null)
+          objdato = datainf[i].Valores;
+        else
+          objdato = $.grep(datainf[i].Valores, function (ex) { return ex.Periodo == elm.anio; });
+        try {
+          valor_ = quitarcomas(objdato[0].Valor);
+        } catch (error) {
+          valor_ = 0;
+          console.log("crearmapad3simplecontooltip" + objdato[0]+ error);
+        }
+        nom_estado = datainf[i].Entidad.toString();
+        if (nom_estado.length != 1) {
+          if (nom_estado.startsWith("0"))
+            nom_estado = nom_estado.substring(1);
+        }
+      }
+      else {
+        valor_ = quitarcomas(datainf[i].val);
+        nom_estado = datainf[i].id;
+      }
+
+      if (nom_estado != 0) {
+        let estrat;
+        // Find the corresponding state inside the GeoJSON
+        for (let j = 0; j < data.objects.salida.geometries.length; j++) {
+          let jsonState = data.objects.salida.geometries[j].properties.NOMGEO;
+          switch (jsonState) {
+            case "Distrito Federal":
+              jsonState = "Ciudad de México";
+              break;
+            case "Veracruz":
+              jsonState = "Veracruz de Ignacio de la Llave";
+              break;
+            case "Coahuila":
+              jsonState = "Coahuila de Zaragoza";
+              break;
+            case "Michoacán":
+              jsonState = "Michoacán de Ocampo";
+              break;
+          }
+
+          if (nom_estado == data.objects.salida.geometries[j].properties.OID) {
+            // Copy the data value into the JSON
+            data.objects.salida.geometries[j].properties.establecimientos = Number(valor_);
+            data.objects.salida.geometries[j].properties.colorr = elm.municipios[nom_estado].color;
+            // Stop looking through the JSON
+            break;
+          }
+        }
+      }
+    }
+    // MAP
+    let g = svg.append('g')
+      .selectAll('path')
+      .data(states.features)
+      .enter()
+      .append('path')
+      .attr("d", path)
+      .style("stroke", "#ffffff")
+      .style('fill', '#cccccc')
+      .attr("id", "svg_"+ elm.id)
+      .style('transition', "all 0.2s ease-in-out")
+      .style("stroke-width", 1)
+      .on('mousemove', function (d) {
+        calcularTop(elm,tipoTematico,tipoDirectorio);
+        let left = d3.event.pageX - $('#' + elm.id).offset().left;
+        let top = d3.event.pageY - $('#' + elm.id).offset().top;
+        let txtlegend;
+        if (d.properties.establecimientos == 0)
+          txtlegend = "No disponible";
+        else
+          txtlegend = format(d.properties.establecimientos);
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", .9);
+
+        if(tipoDirectorio||tipoTematico){
+          if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                  left=left+40;
+            tooltip.style("left", (left+35) + "px")
+            .style("top", (top+tooltipTop) + "px")
+            .text(d.properties.NOMGEO + ': ' + txtlegend)
+          }
+          else{
+            if((elm.id).indexOf('tab')!=-1)
+              left=left +40;
+            tooltip.style("left", (left+25) + "px")
+            .style("top", (top+tooltipTop) + "px")
+            .text(d.properties.NOMGEO + ': ' + txtlegend)
+          }
+      })
+      .on("mouseover", function (d) {
+        d3.select(this)
+          .style("cursor", "pointer");
+
+      })
+      .on("mouseout", function (d, i) {
+
+        tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
+
+    let highlighted = "";
+    let fillcolor;
+  });
+
+}
+
+function crearmapad3simplegris(D3parametros) {
+  let svg;
+  response = D3parametros.informacion;
+  let elm = D3parametros.objeto;
+  idelm = elm.id;
+  if (elm.id.includes("mapaTematico")) {
+    tipoTematico=true;
+    if(elm.id=="mapaTematico"){
+      tipoDirectorio=true;
+      validaind = true;
+    }
+  }
+  else {
+    tipoDirectorio=false;
+    if (response == undefined)
+      validaind = false;
+    else if (response[0] == undefined)
+      validaind = true;
+    else if (response[0].Indicador != elm.indicador)
+      validaind = false;
+    else
+      validaind = true;
+  }
+
+  let elmObj = cr_elem_D3('div', '', { 'id': 'objMapa_' + elm.id }, '');
+  let elemento = document.getElementById(elm.id);
+  elemento.appendChild(elmObj);
+
+
+  let height = $('#' + elm.id).innerHeight();
+  let width = $('#' + elm.id).innerWidth();
+  let projection = d3.geoAlbers();
+  let path = d3.geoPath().projection(projection);
+
+  //creamos contenedor
+   svg = d3.select("#objMapa_" + elm.id).append("svg")
+    .attr("id", "Capa_1"+ elm.id)
+    .attr("width", width)
+    .attr("height", height);
+
+  let tooltip = d3.select("#objMapa_" + elm.id).append("div")
+    .attr("id", "tooltipmap"+ elm.id)
+    .attr("class", "tooltipmap")
+    .style("opacity", 0);
+  d3.json('/componentes/mapad3/data/estados.json', function (error, data) {
+    if (error) throw error;
+    let states = topojson.feature(data, data.objects.salida);
+
+    let b, s, t;
+    projection.scale(1).translate([0, 0]);
+     b = path.bounds(states);
+     s = .9 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+     t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+    projection.scale(s).translate(t);
+    //LOOP API JSON
+
+
+    for (let j = 0; j < data.objects.salida.geometries.length; j++) {
+      let jsonState = data.objects.salida.geometries[j].properties.NOMGEO;
+      switch (jsonState) {
+        case "Distrito Federal":
+          jsonState = "Ciudad de México";
+          break;
+        case "Veracruz":
+          jsonState = "Veracruz de Ignacio de la Llave";
+          break;
+        case "Coahuila":
+          jsonState = "Coahuila de Zaragoza";
+          break;
+        case "Michoacán":
+          jsonState = "Michoacán de Ocampo";
+          break;
+      }
+    }
+    let g = svg.append('g')
+      .selectAll('path')
+      .data(states.features)
+      .enter()
+      .append('path')
+      .attr("d", path)
+      .style("stroke", "#ffffff")
+      .style('fill', '#cccccc')
+      .style('transition', "all 0.2s ease-in-out")
+      .style("stroke-width", 1)
+  });
+
+
+
+}
+
+function etiquetasFijas(svg,datopo,path,format,tipoMundi,contmap,color,elm,tipoApi){
+  let svgfeatures;
+  if(tipoMundi){
+     // Drawing the map
+     svgfeatures= svg.append('g')
+     .selectAll('path')
+     .data(datopo.features)
+     .enter()
+     .append('path')
+     .attr("d", path)
+     .style("stroke", "#ffffff")
+     .style("stroke-width", 1) 
+     .style("fill", function(d) {
+       let colorp;
+       let value = d.properties.valor;
+       if (value != undefined) {
+           if(!isNaN(value)){ 
+               colorp = d.properties.color;
+           }
+           else{
+               colorp="#ccc";
+           }
+       }
+       else{
+               colorp="#ccc";
+           }
+    
+        return colorp;
+        });
+
+      svg.selectAll(".circles")
+      .data(datopo.features)
+      .enter()
+      .append("circle")
+      .attr("d", path)
+      .attr("transform", function(d) {
+        if (d.properties.valor != undefined){
+            if(!isNaN(d.properties.valor)){
+              return "translate(" + path.centroid(d) + ")"; 
+            }
+          }
+        })
+      .style("fill", "red");
+
+     svg.selectAll(".place-label")
+     .data(datopo.features)
+     .enter().append("text")
+     .attr("dy", ".35em")
+     .attr("dx", "-1.2em")
+     .style("stroke-width", 2)
+     .attr("x", function(d) { 
+        if (d.properties.nombrePais==='España' )
+          return 40; 
+        })
+    .style("text-anchor", function(d) { 
+        return d.properties.nombrePais==='España' ? "start" : "end"; 
+      })
+     .attr("transform", function(d) {
+      if (d.properties.valor != undefined){
+          if(!isNaN(d.properties.valor)){
+              console.log(d.properties.nombrePais+": "+path.centroid(d) );
+            return "translate(" + path.centroid(d) + ")"; 
+          }
+        }
+      })
+    .text(function(d) { 
+      let txt;
+      if (d.properties.valor != undefined){
+          if(!isNaN(d.properties.valor)){
+            txt=d.properties.nombrePais + "\n"  + format(d.properties.valor);
+          }
+        }
+      return txt; 
+    });
+
+  }
+  else{
+    if (tipoApi){
+      svgfeatures = svg.append('g')
+        .selectAll('path')
+        .data(datopo.features)
+        .enter()
+        .append('path')
+        .attr("d", path)
+        .attr("id", "svg_"+ elm.id)
+        .style("stroke", "#ffffff")
+        .style("stroke-width", 1) 
+        .style("fill", function (d) {
+          let colorp;
+          // Get data value
+          let value = d.properties.establecimientos;
+          //llenamos los rangos
+          if (value != undefined) {
+            if(!isNaN(value)){
+              colorp = d.properties.colorr;
+              mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color = colorp;
+              return colorp;
+            }
+            else{
+              return "#ccc";
+            }
+            
+          } else {
+            //If value is undefined…
+            return "#ccc";
+          }
+        });
+        svg.selectAll(".place-label")
+        .data(datopo.features)
+        .enter().append("text")
+        .attr("class", "labels")
+        .attr("transform", function(d) {
+         if (d.properties.establecimientos != undefined){
+             if(!isNaN(d.properties.establecimientos)){
+                console.log(d.properties.NOMGEO +"-"+ path.centroid(d))
+                 return "translate(" + path.centroid(d) + ")"; 
+             }
+           }
+         })
+       .attr("dy", ".35em")
+       .attr("dx", ".65em")
+       .text(function(d) { 
+         let txt;
+         if (d.properties.establecimientos != undefined){
+             if(!isNaN(d.properties.establecimientos)){
+               txt=d.properties.NOMGEO + "\n"  + format(d.properties.establecimientos);
+             }
+           }
+         return txt; 
+       });
+    }else{
+      svgfeatures= svg.append('g')
+      .selectAll('path')
+      .data(datopo.features)
+      .enter()
+      .append('path')
+      .attr("d", path)
+      .attr("id", "svg_"+ elm.id)
+      .style("stroke", "#ffffff")
+      .style("stroke-width", 1) 
+      .style("fill", function (d) {
+        // Get data value
+        let value = d.properties.establecimientos;
+        //llenamos los rangos
+        if (value != undefined) {
+          if(!isNaN(value)){
+            mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color=color(value);
+            return color(value);
+          }
+          else{
+            return "#ccc";
+          }
+          
+        } else {
+          return "#ccc";
+        }
+      });
+
+      svg.selectAll(".place-label")
+      .data(datopo.features)
+      .enter().append("text")
+      .attr("class", "labels")
+      .attr("transform", function(d) {
+       if (d.properties.establecimientos != undefined){
+           if(!isNaN(d.properties.establecimientos)){
+            console.log(d.properties.NOMGEO +"-"+ path.centroid(d))
+              return "translate(" + path.centroid(d) + ")"; 
+           }
+         }
+       })
+     .attr("dy", ".35em")
+     .attr("dx", ".65em")
+     .text(function(d) { 
+       let txt;
+       if (d.properties.establecimientos != undefined){
+           if(!isNaN(d.properties.establecimientos)){
+             txt=d.properties.NOMGEO + "\n"  + format(d.properties.establecimientos);
+           }
+         }
+       return txt; 
+     });
+    
+    }
+   
+  }
+  return svgfeatures;
+}
+
+function etiquetasTooltip(svg,datopo,path,format,tooltip,elm,tipoMundi,contmap,color,tipoApi,tipoTematico,tipoDirectorio){
+  let svgfeatures;
+  if(tipoMundi){
+    // Create data: coordinates of start and end
+  svgfeatures=svg.append('g')  
+      .selectAll('path')
+      .data(datopo.features)
+      .enter()
+      .append('path')
+      .attr("d", path)
+      .style('transition', "all 0.2s ease-in-out")
+      .style("stroke", "#ffffff")
+      .style("stroke-width", 1) 
+      .style("fill", function(d) {
+        let colorp;
+        let value = d.properties.valor;
+        if (value != undefined) {
+            if(!isNaN(value)){ 
+                colorp = d.properties.color;
+            }
+            else{
+                colorp="#ccc";
+            }
+        }
+        else{
+                colorp="#ccc";
+            }
+    
+        return colorp;
+        })
+      .on('mousemove', function (d) {
+      let left = d3.event.pageX - $('#' + elm.id).offset().left;
+      let top = d3.event.pageY - $('#' + elm.id).offset().top;
+      let txtlegend;
+      if (d.properties.valor != undefined){
+        if(!isNaN(d.properties.valor)){
+          txtlegend = format(d.properties.valor);
+        }
+        else
+          txtlegend = "No disponible";
+      }
+      else
+          txtlegend = "No disponible";
+
+        tooltip.transition()
+        .duration(200)
+        .style("opacity", .9);
+
+          tooltip.style("left", (left+35) + "px")
+          .style("top", (top) + "px")
+          .text(d.properties.nombrePais + ': ' + txtlegend)
+        
+    })
+    .on("mouseover", function (d) {
+      if (d.properties.valor != undefined){
+        if(!isNaN(d.properties.valor)){
+          d3.select(this)
+          .style("fill", tinycolor(d.properties.color).darken(15).toString())
+          .style("cursor", "pointer");
+        }   
+      }
+    })
+    .on("mouseout", function (d, i) {
+      d3.select(this).style("fill", function () {
+        if (d.properties.valor != undefined){
+          if(!isNaN(d.properties.valor)){
+            let uRate = d.properties.color;
+            return uRate ? uRate : uRate;
+          }
+          else{                    
+            return "#ccc";
+          } 
+        }
+        else{
+          return '#ccc';
+        }
+      });
+      tooltip.transition()
+      .duration(500)
+      .style("opacity", 0);
+  });
+
+  }
+  else{
+    if(tipoApi){
+      svgfeatures=  svg.append('g')
+        .selectAll('path')
+        .data(datopo.features)
+        .enter()
+        .append('path')
+        .attr("d", path)
+        .style('transition', "all 0.2s ease-in-out")
+        .style("stroke", "#ffffff")
+        .attr("id", "svg_"+ elm.id)
+        .style("stroke-width", 1)
+        .style("fill", function (d) {
+          let colorp;
+          // Get data value
+          let value = d.properties.establecimientos;
+          //llenamos los rangos
+          if (value != undefined) {
+            if(!isNaN(value)){
+              colorp = d.properties.colorr;
+              mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color = colorp;
+              return colorp;
+            }
+            else{
+              return "#ccc";
+            }
+            
+          } else {
+            //If value is undefined…
+            return "#ccc";
+          }
+        })
+        .on('mousemove', function (d) {
+          calcularTop(elm,tipoTematico,tipoDirectorio);
+          let left = d3.event.pageX - $('#' + elm.id).offset().left;
+          let top = d3.event.pageY - $('#' + elm.id).offset().top;
+          let txtlegend;
+          if (d.properties.establecimientos != undefined){
+            if(!isNaN(d.properties.establecimientos)){
+              txtlegend = format(d.properties.establecimientos);
+            }
+            else
+            txtlegend = "No disponible";
+          }
+          else
+            txtlegend = "No disponible";
+
+            tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+
+            if(tipoDirectorio||tipoTematico){
+              if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                  left=left+40;
+              tooltip.style("left", (left+35) + "px")
+              .style("top", (top+tooltipTop) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            }
+            else{
+              if((elm.id).indexOf('tab')!=-1)
+                left=left +40;
+              tooltip.style("left", (left+45) + "px")
+              .style("top", (top+tooltipTop) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            }
+        })
+        .on("mouseover", function (d) {
+          if (d.properties.establecimientos != undefined){
+            if(!isNaN(d.properties.establecimientos)){
+              d3.select(this)
+              .style("fill", tinycolor(d.properties.colorr).darken(15).toString())
+              .style("cursor", "pointer");
+            }   
+          }
+        })
+        .on("mouseout", function (d, i) {
+          d3.select(this).style("fill", function () {
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                let uRate = d.properties.colorr;
+                return uRate ? uRate : uRate;
+              }
+              else{                    
+                return "#ccc";
+              } 
+            }
+          });
+
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
+
+
+    }
+    else{
+      svgfeatures= svg.append('g')
+          .selectAll('path')
+          .data(datopo.features)
+          .enter()
+          .append('path')
+          .attr("d", path)
+          .style('transition', "all 0.2s ease-in-out")
+          .style("stroke", "#ffffff")
+          .attr("id", "svg_"+ elm.id)
+          .style("stroke-width", 1)
+          .style("fill", function (d) {
+            // Get data value
+            let value = d.properties.establecimientos;
+            //llenamos los rangos
+            if (value != undefined) {
+              if(!isNaN(value)){
+                mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color=color(value);
+                return color(value);
+              }
+              else{
+                return "#ccc";
+              }
+              
+            } else {
+              return "#ccc";
+            }
+          })
+          .on('mousemove', function (d) {
+            calcularTop(elm,tipoTematico,tipoDirectorio);
+            let left = d3.event.pageX - $('#' + elm.id).offset().left;
+            let top = d3.event.pageY - $('#' + elm.id).offset().top;
+            let txtlegend;
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                txtlegend = format(d.properties.establecimientos);
+              }
+              else
+              txtlegend = "No disponible";
+            }
+            else
+              txtlegend = "No disponible";
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+
+            if(tipoDirectorio||tipoTematico){
+              if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                  left=left+40;
+              tooltip.style("left", (left+35) + "px")
+              .style("top", (top+tooltipTop) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            }
+            else{
+              if((elm.id).indexOf('tab')!=-1)
+                left=left +40;
+              tooltip.style("left", (left+25) + "px")
+              .style("top", (top+tooltipTop) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            }
+          
+          })
+          .on("mouseover", function (d) {
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                d3.select(this)
+                .style("fill", tinycolor(color(d.properties.establecimientos)).darken(15).toString())
+                .style("cursor", "pointer");
+              }
+            }
+          })
+          .on("mouseout", function (d, i) {
+            d3.select(this).style("fill", function () {
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  let uRate = d.properties.establecimientos;
+                  return uRate ? color(uRate) : color(uRate);
+                }
+                else{                    
+                  return "#ccc";
+                }              
+              }
+            });
+
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+    }
+    
+  }
+         
+        return svgfeatures;
+}
+
+function paletasColores(colores,idColor,dataEstra,encDomIng,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio){ 
+  let titleTooltip;
+  let svg;
+  if(encDomIng)
+    titleTooltip="Click to choose";
+  else
+  titleTooltip="Click para elegir";
+   
+
+  let data = d3.range(0, 6);
+  // ordinal scale for our data
+  let colorScale = d3.scaleOrdinal(colores);
+  let widthsvg,heightsvg;
+  widthsvg=($('#'+idelm).width()-356)/4;
+  heightsvg=18;
+  if (screen.width <= 620 || $('#'+idelm).width()<= 620 ) {
+    heightsvg=(widthsvg/6)-2;
+    if( $('#'+idelm).width()<=476){
+      widthsvg=(476-216)/4;
+      heightsvg=(widthsvg/6)-2;
+    }
+  }
+
+  
+  let div = d3.select("#paletas"+elm.id).append("div")
+  .attr("id", "div" + idColor+elm.id)
+  .attr("class", "divpaletas");
+
+
+   svg = div.append("svg")
+    .attr("id", "svgPaleta"+elm.id + idColor)
+    .attr("width", widthsvg)
+    .attr("height", heightsvg)
+    .attr("data-toggle","tooltip")
+    .attr("data-placement","bottom")
+    .attr("title",titleTooltip);
+    
+    svg.selectAll('rect')
+    .data(data)
+    .enter()
+    .append('rect')
+   .style("fill", function(d) { 
+       return colorScale(d); })
+    .attr("x", function(d, i) { return i * heightsvg })
+    .attr("width", heightsvg)
+    .attr("height", heightsvg)
+    .style("cursor", "pointer")
+    .on("click", function () {
+      changeColor(colores,dataEstra,idColor,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio);
+  });
+
+}
+
+function changeColor(colores,dataEstra,idColor,elm,g,legend,color,tooltip,states,tipoTematico,tipoDirectorio){
+  let bceros;
+  let banderaAPI = false;
+  for (let e = 0; e < dataEstra.length; e++) {
+   if(dataEstra[e].nestrato==0)
+     bceros =true;   
+ }
+  let contmap=0;
+  for(let t=0;t<mapasTemObj_D3.length;t++){
+      if(elm.id==mapasTemObj_D3[t].idColor)
+        contmap=t;
+  }
+  paletaSelect(idColor,elm);
+  let contenedor = document.getElementById(elm.id);
+  contenedor.setAttribute('data-colorchange', idColor);
+  let restrato= $('input:radio[name=scaleradio'+elm.id+']:checked').val();
+  if(restrato==undefined)
+    restrato=elm.tipoEstratifica;
+  let highlighted = "";
+  let nuevoscolores= [];
+  if(restrato==4){
+    for (let co=0;co<restrato;co++){
+      nuevoscolores[co]=colores[co];
+    }
+  }
+  else{
+      for (let co=0;co<dataEstra.length;co++){
+        nuevoscolores[co]=colores[co];
+    }
+  }
+  
+  if(restrato=='3'||restrato=='4'){
+    banderaAPI=false;
+      color.range(nuevoscolores);
+      if(d3.selectAll(".subdivision")._groups[0].length!=0){
+            d3.selectAll(".subdivision")
+            .style("fill", function (d,i ) {
+              // Get data value
+              let value = d.properties.establecimientos;
+              
+              //llenamos los rangos
+              if (value != undefined) {
+                if(!isNaN(value)){
+                  let cont=d.properties.CVE_MUN;
+                  if (cont.length != 1) {
+                    if (cont.startsWith("0"))
+                        cont = cont.substring(1);
+                        if(cont.startsWith("0"))
+                          cont = cont.substring(1);
+                    cont--;
+                  }
+                  let colorp=  banderaAPI?d.properties.colorr:color(value);
+                  mapasTemObj_D3[contmap]["municipiosR"][cont].color = colorp;
+                  return colorp;
+                }
+                else{
+                  return "#ccc";
+                }
+                
+              } else {
+                //If value is undefined…
+                return "#ccc";
+              }
+            })
+            .on('mousemove', function (d) {
+              let left = d3.event.pageX - $('#' + elm.id).offset().left;
+              let top = d3.event.pageY - $('#' + elm.id).offset().top;
+              let txtlegend;
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  txtlegend = format(d.properties.establecimientos);
+                }
+                else
+                txtlegend = "No disponible";
+              }
+              else
+                txtlegend = "No disponible";
+              tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+
+              tooltip.style("left", (left+25) + "px")
+              .style("top", (top) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            
+            })
+            .on("mouseover", function (d) {
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  let colorP=  banderaAPI?d.properties.colorr:color(d.properties.establecimientos);
+                  d3.select(this)
+                  .style("fill", tinycolor(colorP).darken(15).toString())
+                  .style("cursor", "pointer");
+                }
+              }
+            })
+            .on("mouseout", function (d, i) {
+              d3.select(this).style("fill", function () {
+                if (d.properties.establecimientos != undefined){
+                  if(!isNaN(d.properties.establecimientos)){ 
+                    let uRate = banderaAPI?d.properties.colorr:color(d.properties.establecimientos);
+                    return uRate;
+                  }
+                  else{                    
+                    return "#ccc";
+                  }              
+                }
+              });
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            });
+            legend.data(color.range())
+            .on("click", function (d,i) {
+                  // clicking an active entry: reset
+              if(highlighted == d) {
+                d3.selectAll(".subdivision").style("opacity",1);
+  
+                legend.selectAll("rect")
+                .style("class",function(d) { return d; });
+  
+                highlighted = ""; // rest
+              }
+              else {
+                highlighted = d;
+  
+                d3.selectAll(".subdivision").style("opacity", 0.2)
+                .filter(function (f) {
+                  return color(f.properties.establecimientos) == d
+                })
+                .style("opacity", 1);
+                // set legend:
+                legend.selectAll("rect")
+                .style("class","white");
+  
+              d3.select(this).select("rect")
+                .style("fill",function(d) { return d;});
+              }
+          });
+      }
+      else{
+        g
+        .data(states.features)
+        .style("fill", function (d) {
+          let colorp;
+          // Get data value
+          let value = d.properties.establecimientos;
+          mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color=color(value);
+          //llenamos los rangos
+          if (value != undefined) {
+            if(!isNaN(value)){
+              return color(value);
+            }
+            else{
+              return "#ccc";
+            }
+           
+          } else {
+            //If value is undefined…
+            return "#ccc";
+          }
+        }) 
+        .on('mousemove', function (d) {
+          let txtlegend;
+          calcularTop(elm,tipoTematico,tipoDirectorio);
+          let left = d3.event.pageX - $('#' + elm.id).offset().left;
+          let top = d3.event.pageY - $('#' + elm.id).offset().top;
+          
+        if (d.properties.establecimientos != undefined) {
+          if(!isNaN(d.properties.establecimientos)){
+            txtlegend= format(d.properties.establecimientos);
+          }
+          else{
+            txtlegend = "No disponible";
+          }
+        }
+        else
+          txtlegend = "No disponible";     
+        tooltip.transition()
+        .duration(200)
+        .style("opacity", .9); 
+            if(tipoDirectorio||tipoTematico){
+              if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                  left=left+40;
+              tooltip.style("left", (left+35) + "px")
+              .style("top", (top+tooltipTop) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            }
+            else{
+              if((elm.id).indexOf('tab')!=-1)
+                left=left +40;
+              tooltip.style("left", (left+25) + "px")
+              .style("top", (top+tooltipTop) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            }
+        })
+        .on("mouseove", function (d) {
+          if (d.properties.establecimientos != undefined) {
+            if(!isNaN(d.properties.establecimientos)){
+              d3.select(this)
+              .style("fill", tinycolor(color(d.properties.establecimientos)).darken(15).toString())
+              .style("cursor", "pointer");
+            }
+          }
+        })
+        .on("mouseout", function (d, i) {
+          d3.select(this).style("fill", function () {
+            if (d.properties.establecimientos != undefined) {
+              if(!isNaN(d.properties.establecimientos)){
+                let uRate = d.properties.establecimientos;
+                return uRate ? color(uRate) : color(uRate);
+              }
+              else{                    
+                return "#ccc";
+            } 
+            }
+          });
+  
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
+        
+      legend.data(color.range())
+          .on("click", function (d,i) {
+                // clicking an active entry: reset
+            if(highlighted == d) {
+              g.style("opacity",1);
+
+              legend.selectAll("rect")
+              .style("class",function(d) { return d; });
+
+              highlighted = ""; // rest
+            }
+            else {
+              highlighted = d;
+
+              g.style("opacity", 0.2)
+              .filter(function (f) {
+                return color(f.properties.establecimientos) == d
+              })
+              .style("opacity", 1);
+              // set legend:
+              legend.selectAll("rect")
+              .style("class","white");
+
+            d3.select(this).select("rect")
+              .style("fill",function(d) { return d;});
+            }
+        });
+      }
+
+    legend.selectAll("rect").remove();
+    legend.append("rect")
+              .attr("width", 18)
+              .attr("height", 15)
+              .style("fill", function(d){ 
+                return d;
+              }) 
+            // .attr("fill", color)
+              .style("cursor", "pointer");
+  }
+  else{
+    banderaAPI=true;
+    color.range(nuevoscolores);
+
+    if(d3.selectAll(".subdivision")._groups[0].length!=0){
+            d3.selectAll(".subdivision")
+            .style("fill", function (d,i ) {
+              // Get data value
+              let value = d.properties.establecimientos;
+              let colorp;
+              //llenamos los rangos
+              if (value != undefined) {
+                if(!isNaN(value)){
+                  let cont=d.properties.CVE_MUN;
+                  if (cont.length != 1) {
+                    if (cont.startsWith("0"))
+                        cont = cont.substring(1);
+                        if(cont.startsWith("0"))
+                          cont = cont.substring(1);
+                    cont--;
+                  }
+                  if(bceros)
+                    colorp = nuevoscolores[d.properties.estrator];
+                  else
+                    colorp = nuevoscolores[d.properties.estrator-1];
+                  
+                  mapasTemObj_D3[contmap]["municipiosR"][cont].color = colorp;
+                  return colorp;
+                }
+                else{
+                  return "#ccc";
+                }
+                
+              } else {
+                //If value is undefined…
+                return "#ccc";
+              }
+            })
+            .on('mousemove', function (d) {
+              let left = d3.event.pageX - $('#' + elm.id).offset().left;
+              let top = d3.event.pageY - $('#' + elm.id).offset().top;
+              let txtlegend;
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  txtlegend = format(d.properties.establecimientos);
+                }
+                else
+                txtlegend = "No disponible";
+              }
+              else
+                txtlegend = "No disponible";
+              tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+
+              tooltip.style("left", (left+25) + "px")
+              .style("top", (top) + "px")
+              .text(d.properties.NOMGEO + ': ' + txtlegend)
+            
+            })
+            .on("mouseover", function (d) {
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  let colorP;
+                  if(bceros)
+                    colorP = nuevoscolores[d.properties.estrator];
+                  else
+                    colorP = nuevoscolores[d.properties.estrator-1];
+                
+                  d3.select(this)
+                  .style("fill", tinycolor(colorP).darken(15).toString())
+                  .style("cursor", "pointer");
+                }
+              }
+            })
+            .on("mouseout", function (d, i) {
+              d3.select(this).style("fill", function () {
+                if (d.properties.establecimientos != undefined){
+                  if(!isNaN(d.properties.establecimientos)){ 
+                    let uRate;
+                  if(bceros)
+                      uRate = nuevoscolores[d.properties.estrator];
+                  else
+                    uRate = nuevoscolores[d.properties.estrator-1];
+                    return uRate;
+                  }
+                  else{                    
+                    return "#ccc";
+                  }              
+                }
+              });
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            });
+
+            $("#estMapa_" +elm.id).empty();
+            let lg= d3.select("#estMapa_" +elm.id)
+            .selectAll("g")
+            .data(color.range())
+            .enter()
+            .append("g")
+            .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+            .on("click", function (d, i) {
+              // clicking an active entry: reset
+              if (highlighted == d) {
+                d3.selectAll(".subdivision").style("opacity", 1);
+      
+                lg.selectAll("rect")
+                  .style("class", function (d) { return d; });
+      
+                highlighted = ""; // rest
+              }
+              else {
+                highlighted = d;
+      
+                d3.selectAll(".subdivision").style("opacity", 0.2)
+                  .filter(function (f) {
+                    let p;
+                    if(bceros){
+                      if (nuevoscolores[f.properties.estrator] == d)
+                      p = true;
+                      return p;
+                    }
+                  })
+                  .style("opacity", 1);
+      
+      
+                // set legend:
+                lg.selectAll("rect")
+                  .style("class", "white");
+      
+                d3.select(this).select("rect")
+                  .style("fill", function (d) { return d; });
+              }
+      
+            });
+             
+            lg.append("rect")
+          .attr("width", 18)
+          .attr("height", 15)
+          .style("fill", function (d) {
+            return d;
+          })
+          .style("cursor", "pointer");
+          
+          lg.append("text")
+          .attr("x", 24)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .text(function (d, i) {
+            let t = "";
+              if (i == 0) {
+                if (encDomIng)
+                  t = "from " + format(dataEstra[i].limInferior) + " to " + format(dataEstra[i].limSuperior);
+                else
+                  t = "de " + format(dataEstra[i].limInferior) + " a " + format(dataEstra[i].limSuperior);
+              }
+              else {
+                if (encDomIng)
+                  t = "more than " + format(dataEstra[i].limInferior) + " to " + format(dataEstra[i].limSuperior);
+                else
+                  t = "más de " + format(dataEstra[i].limInferior) + " a " + format(dataEstra[i].limSuperior);
+              }
+            return t
+          });
+      
+           let highlighted = "";
+           legend=lg;
+    }
+    else{
+          g
+          .data(states.features)
+          .style("fill", function (d) {
+            let colorp;
+            // Get data value
+            let value = d.properties.establecimientos;
+            //llenamos los rangos
+            if (value != undefined) {
+              if(!isNaN(value)){
+                if(bceros)
+                  colorp = nuevoscolores[d.properties.estrator];
+                else
+                  colorp = nuevoscolores[d.properties.estrator-1];
+                mapasTemObj_D3[contmap]["municipios"][d.properties.OID].color=colorp;
+                return colorp;
+              }
+              else
+              return "#ccc";
+            } else {
+              //If value is undefined…
+              return "#ccc";
+            }
+          }) 
+          .on('mousemove', function (d) {
+            calcularTop(elm,tipoTematico,tipoDirectorio);
+            let left = d3.event.pageX - $('#' + elm.id).offset().left;;
+            let top = d3.event.pageY - $('#' + elm.id).offset().top;
+            let txtlegend;
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                txtlegend = format(d.properties.establecimientos);
+              }
+              else
+              txtlegend = "No disponible";
+            }
+            else
+              txtlegend = "No disponible";
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+              if(tipoDirectorio||tipoTematico){
+                if(elm.datosfijos && (elm.id).indexOf('tab')!=-1)
+                      left=left+40;
+                tooltip.style("left", (left+35) + "px")
+                .style("top", (top+tooltipTop) + "px")
+                .text(d.properties.NOMGEO + ': ' + txtlegend)
+              }
+              else{
+                if((elm.id).indexOf('tab')!=-1)
+                  left=left +40;
+                tooltip.style("left", (left+25)  + "px")
+                .style("top", (top+tooltipTop) + "px")
+                .text(d.properties.NOMGEO + ': ' + format(d.properties.establecimientos))
+              }
+          })
+          .on("mouseover", function (d) {
+            if (d.properties.establecimientos != undefined){
+              if(!isNaN(d.properties.establecimientos)){
+                if(bceros){
+                  d3.select(this)
+                  .style("fill", tinycolor(nuevoscolores[d.properties.estrator]).darken(15).toString())
+                  .style("cursor", "pointer");
+                }
+                else{
+                  d3.select(this)
+                  .style("fill", tinycolor(nuevoscolores[d.properties.estrator-1]).darken(15).toString())
+                  .style("cursor", "pointer");
+              }
+                
+              }
+            }
+            
+
+          })
+          .on("mouseout", function (d, i) {
+            let uRate;
+            d3.select(this).style("fill", function () {
+              if (d.properties.establecimientos != undefined){
+                if(!isNaN(d.properties.establecimientos)){
+                  if(bceros)
+                    uRate = nuevoscolores[d.properties.estrator];
+                  else
+                    uRate = nuevoscolores[d.properties.estrator-1];
+                  return uRate ? uRate : uRate;
+                }
+                else{                    
+                  return "#ccc";
+                } 
+              }
+            });
+
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+
+          $("#estMapa_" +elm.id).empty();
+          let lg= d3.select("#estMapa_" +elm.id)
+          .selectAll("g")
+          .data(color.range())
+          .enter()
+          .append("g")
+          .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+          .on("click", function (d,i) {
+                  // clicking an active entry: reset
+              if(highlighted == d) {
+                  g.style("opacity",1);
+
+                  legend.selectAll("rect")
+                  .style("class",function(d) { return d; });
+
+                  highlighted = ""; // rest
+              }
+              else {
+                highlighted = d;
+
+                g.style("opacity", 0.2)
+                .filter(function (f) {
+                  let p;
+                  if(bceros){
+                    if (nuevoscolores[f.properties.estrator] == d)
+                    p = true;
+                    return p
+                  }
+                  else{
+                    if (nuevoscolores[f.properties.estrator-1] == d)
+                    p = true;
+                    return p
+                  }
+                })
+                .style("opacity", 1);
+                // set legend:
+                legend.selectAll("rect")
+                .style("class","white");
+
+              d3.select(this).select("rect")
+                .style("fill",function(d) { return d;});
+              }
+        });
+        lg.append("rect")
+        .attr("width", 18)
+        .attr("height", 15)
+        .style("fill", function (d) {
+          return d;
+        })
+        .style("cursor", "pointer");
+        
+        lg.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function (d, i) {
+          let t = "";
+            if (i == 0) {
+              if (encDomIng)
+                t = "from " + format(dataEstra[i].limInferior) + " to " + format(dataEstra[i].limSuperior);
+              else
+                t = "de " + format(dataEstra[i].limInferior) + " a " + format(dataEstra[i].limSuperior);
+            }
+            else {
+              if (encDomIng)
+                t = "more than " + format(dataEstra[i].limInferior) + " to " + format(dataEstra[i].limSuperior);
+              else
+                t = "más de " + format(dataEstra[i].limInferior) + " a " + format(dataEstra[i].limSuperior);
+            }
+          return t
+        });
+    
+         let highlighted = "";
+         legend=lg;
+
+    }
+  }
+}
+
+function paletaSelect(id,elm){
+  for(let j=1;j<=4;j++){
+    if(j==id)
+      $('#div'+id+elm.id).addClass("selected");
+    else
+      $('#div'+j+elm.id).removeClass("selected")
+  }
+  
+}
+
+function estratoCasoEspecial (banderain, banderafin,estrato,dataEstrad3){
+  try {
+    let newEstra;
+  if(!banderain && !banderafin ){
+    newEstra=estrato;
+  }
+  else if(banderafin && !banderain){
+      if (estrato == 'extremosar')
+            newEstra=dataEstrad3.length;
+        else
+          newEstra=parseInt(estrato);    
+  }
+  else if(banderain && !banderafin ){
+    if (estrato == 'extremosab')
+        newEstra='1';
+      else{
+        newEstra=parseInt(estrato)+1;
+      }
+
+  }
+  else{
+    if (estrato == 'extremosab')
+        newEstra='1';
+    else if (estrato == 'extremosar')
+        newEstra=dataEstrad3.length;
+    else
+      newEstra=parseInt(estrato)+1;
+    
+  }
+  return newEstra.toString();
+  } catch (error) {
+    console.log("estratoCasoEspecial"+error)
+    
+  }
+
+
+}
+
+function addNotasFuente(encDomIng, elm,notasAdi, fuenteAdi) {
+  //se agregan notas y fuente
+  let titlenota, titlefuente;
+  if (encDomIng) {
+    titlenota = 'Notes:';
+    titlefuente = 'Source:';
+  }
+  else {
+    titlenota = 'Notas:';
+    titlefuente = 'Fuente:';
+  }
+
+
+
+  let divp = document.getElementById('objMapa_' + elm.id);
+  let divf = document.createElement("div");
+  if(elm.notasM || elm.fuentesM || fuenteAdi != ""||fuenteAdi.length != 0|| notasAdi != ""||notasAdi.length != 0 ){
+   
+    divf.setAttribute('id', 'divFuenteNota'+ elm.id);
+    divf.setAttribute('class', 'col-md-12');
+    divf.setAttribute('style', 'height:15%;overflow:auto;padding:3px');
+    divp.appendChild(divf);
+  }
+  //document.getElementById('divFuenteNota').style.bottom = bottom2+'px';
+  if(elm.notasM && elm.notas!=''||notasAdi != ""||notasAdi.length != 0){
+    
+    divf.appendChild(cr_elem_D3('div', '', {'id':'divnotas'+elm.id, 'style': 'text-align: left;', 'class': 'pie' }, titlenota + '</br>'));
+  }
+
+
+  if (elm.fuentesM ){
+    if(fuenteAdi != ""||fuenteAdi.length != 0||elm.fuentes != ""){
+      divf.appendChild(cr_elem_D3('div', '', {'id':'divfuentes'+ elm.id, 'class': 'pie' }, titlefuente + '</br>'));
+    }
+        
+  }
+
+  if (elm.notasM && elm.notas != "") {
+    document.getElementById("divnotas"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie'}, elm.notas ));
+  }
+  
+  if (elm.fuentesM && elm.fuentes != "") {
+    if (elm.fuentes.length != 0) {
+      if (elm.fuentes.length == 1) {//cr_elem_D3('a', '', { 'id': 'link', 'href': '#','style':'display:none' }, '')
+        if (elm.fuentes[0].urlProyecto == '')
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie'}, elm.fuentes[0].nombreFuente + '</br>'));
+        else if (elm.fuentes[0].urlProyecto == null) {
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie'}, elm.fuentes[0].nombreFuente + '</br>'));
+        } else {
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link', 'href': elm.fuentes[0].urlProyecto, 'class': ' pie'}, elm.fuentes[0].nombreFuente + '</br>'));
+        }
+        
+      }
+      else {
+        for (let fu = 0; fu < elm.fuentes.length; fu++) {
+          if (fu == 0)
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link' + fu, 'href': elm.fuentes[fu].urlProyecto, 'class': 'pie' }, elm.fuentes[fu].nombreFuente + '</br>'));
+          else {
+            if (elm.fuentes[fu].nombreFuente != elm.fuentes[fu - 1].nombreFuente){
+                if (elm.fuentes[0].urlProyecto == '')
+                  document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link' + fu, 'class': 'pie'}, elm.fuentes[fu].nombreFuente + '</br>'));
+                else if (elm.fuentes[0].urlProyecto == null) 
+                  document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link' + fu, 'class': 'pie'}, elm.fuentes[fu].nombreFuente + '</br>'));
+                else
+                  document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link' + fu, 'href': elm.fuentes[fu].urlProyecto, 'class': 'pie'}, elm.fuentes[fu].nombreFuente + '</br>'));
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  if (notasAdi.length != 0 || notasAdi != "") {
+    document.getElementById("divnotas"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie'}, notasAdi+ '</br>'));
+  }
+
+    if (fuenteAdi.length != 0 || fuenteAdi != "") {
+      if (fuenteAdi.length == 1) {
+        if (fuenteAdi[0].url == '')
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie' }, fuenteAdi[0].nombreF + '</br>'));
+        else if (fuenteAdi[0].url == null) {
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie' }, fuenteAdi[0].nombreF + '</br>'));
+        } 
+        else
+          document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link', 'href': fuenteAdi[0].url, 'class': 'pie' }, fuenteAdi[0].nombreF + '</br>'));
+      }
+      else {
+        for (let fua = 0; fua < fuenteAdi.length; fua++) {
+          if (fuenteAdi[fua].url == '')
+            document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie' }, fuenteAdi[fua].nombreF + '</br>'));
+          else if (fuenteAdi[fua].url == null) {
+            document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('span', '', { 'class': 'pie' }, fuenteAdi[fua].nombreF + '</br>'));
+          } 
+          else
+            document.getElementById("divfuentes"+ elm.id).appendChild(cr_elem_D3('a', '', { 'id': 'link', 'href': fuenteAdi[fua].url, 'class': 'pie' }, fuenteAdi[fua].nombreF + '</br>'));
+        }
+      }
+    }
+}
+
+function quitarcomas(x) {
+  try {
+    return x.replace(/,/g, "");
+  } catch (error) {
+    console.log(x+"quitarcomas"+error)
+  }
+ 
+}
+
+
+const removeAccents = (str) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+} 
+
+
+function getAll(tipoDirectorio, Anioo,datainf) {
+  let newArr = [];
+  let valor;
+  for (let i = 0; i < datainf.length; i++) {
+    if (!tipoDirectorio) {
+      let compara = datainf[i].Entidad.toString();
+      if (compara.length != 1) {
+        if (compara.startsWith("0"))
+          compara = compara.substring(1);
+      }
+      if (compara != 0) {
+        let objdato;
+        if (Anioo == null)
+          objdato = datainf[i].Valores;
+        else
+          objdato = $.grep(datainf[i].Valores, function (ex) { return ex.Periodo == Anioo; });
+        try {
+          valor=quitarcomas(objdato[0].Valor);
+          newArr.push(esNumerico(valor));
+        } catch (error) {
+          newArr.push(0);
+          console.log("getAll" + objdato[0])
+        }
+      }
+    }
+    else {
+      if (datainf[i].id != 0) {
+        try {
+          valor=quitarcomas(datainf[i].val);
+          newArr.push(esNumerico(valor));
+        } catch (error) {
+          console.log("getAll" + objdato[0])
+        }
+      }
+    }
+  }
+  return newArr
+}
+
+function esNumerico (valor){
+  let num= parseFloat(valor);
+  if(!isNaN(num))
+    valor;
+  else
+    valor=0;
+
+  return valor;
+}
+
+function responsiveLegend(svg) {
+
+  const container = d3.select(svg.node().parentNode),
+      width = parseInt(svg.style('width'), 10),
+      height = parseInt(svg.style('height'), 10),
+      aspect = width / height;
+ 
+  svg.attr('preserveAspectRatio', 'xMinYMid')
+      .call(resize);
+
+  d3.select(window).on(
+      'resize.' + container.attr('id'), 
+      resize
+  );
+
+  function resize() {
+      const w = parseInt(container.style('width'));
+      svg.attr('width', w);
+  }
+}
+
+function responsivefy(svg) {
+
+          const  container = d3.select(svg.node().parentNode),
+          width = parseInt(svg.style('width'), 10),
+          height = parseInt(svg.style('height'), 10),
+          aspect = width / height;
+          
+        svg.attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('preserveAspectRatio', 'xMinYMid')
+        .call(resize);
+        
+      
+        d3.select(window).on(
+          'resize.' + container.attr('id'), 
+          resize
+      );
+
+      function resize() {
+          const w = parseInt(container.style('width'));
+          svg.attr('width', w);
+          svg.attr('height', Math.round(w / aspect));
+      }
+  
+
+ 
+}
+
+function cantidadDecimales(cant){
+  try {
+    let parteDecimal= cant.split(".")[1];
+    if(parteDecimal===undefined){
+      return 0;
+    }
+    else
+    {
+      return parteDecimal.length;
+    }
+    
+  } catch (error) {
+    console.log("cantidadDecimales"+error);
+  }
+
+}
+
+//para el tooltip
+function calcularTop(elm,tipoTematico,tipoDirectorio){
+  try {
+    if(tipoDirectorio && !elm.datosfijos){
+      tooltipTop=0;
+    }
+    else{
+      tooltipTop=$('#spanTotal_' + elm.id).innerHeight()+$('#spanPer_' + elm.id).innerHeight();
+      if(elm.unidadMedidaM  && elm.valorM){
+        tooltipTop=tooltipTop+ $('#spanUnidad_' + elm.id).innerHeight();
+      }
+      else if (elm.valorM){
+        tooltipTop=tooltipTop- $('#spanTotal_' + elm.id).innerHeight();
+      }
+      else if (elm.unidadMedidaM)
+        tooltipTop=tooltipTop- $('#spanUnidad_' + elm.id).innerHeight();
+      else
+        tooltipTop;
+
+      if((elm.id).indexOf('tab')!=-1){
+        tooltipTop=tooltipTop+90;
+      }
+      else if((elm.id).indexOf('graf')!=-1){
+        tooltipTop=tooltipTop-10;
+      }
+      else{
+        tooltipTop=tooltipTop+0;
+      }
+
+      if(tipoTematico && !tipoDirectorio)
+        tooltipTop=tooltipTop-50;
+
+
+    } 
+  } catch (error) {
+      console.log("calcularTop: "+error);
+  }
+}
+
+function calcularTopLegend(elm,tipoDirectorio){
+  let cont=document.getElementById(elm.id);
+  let mesc =  cont.getAttribute('data-mestra');
+  let mpal =  cont.getAttribute('data-mpaleta');
+  if(tipoDirectorio){
+    let topR;
+    document.getElementById('estMapa_' + elm.id).style.left = '20px';
+        if(mesc==='true'||mpal==='true'){
+            topR=document.getElementById('estMapa_' + elm.id).style.top;
+            topR=parseInt(topR.substring(0, 3));
+            topR=topR+10;
+      }
+    
+  }
+  else{
+    if(mesc==='true'||mpal==='true'){
+      topR=document.getElementById('estMapa_' + elm.id).style.top;
+      topR=parseInt(topR.substring(0, 3));
+      topR=topR+60;
+      document.getElementById('estMapa_' + elm.id).style.top=topR;
+    }
+  }
+  
+}
+
+const updateEstratificacion = (estrato, dataValores,color,coloresEleg) =>{
+  try {
+
+        
+    if(estrato!='4'){
+      if(estrato!='3'){
+        color.range(coloresEleg);
+      }
+      color.domain([Math.min.apply(Math, dataValores), Math.max.apply(Math, dataValores)]);
+  }
+  else{
+    let ordenar = dataValores.sort(function (a, b) { return a - b });
+    color.domain(ordenar);
+
+  }
+  } catch (error) {
+    console.log("updateEstratificacion"+error);
+  }
+};
+
+const updateLegend = (id,estrato, dataEstrad3,color,legend,g,arrayColores, bceros) =>{
+  try {
+    let heightLegend= arrayColores.length*25;
+    $("#"+id).css("height",heightLegend);
+
+    if(estrato=='3'||estrato=='4'){
+      legend
+      .data(color.range())
+      .on("click", function (d,i) {
+        // clicking an active entry: reset
+        if(highlighted == d) {
+          g.style("opacity",1)
+          legend.selectAll("rect")
+          .style("class",function(d) { 
+            return d; 
+          });
+          highlighted = ""; // rest
+        }
+        else {
+          highlighted = d;
+          g.style("opacity", 0.2)
+          .filter(function (f) {
+          return color(f.properties.establecimientos) == d
+          })
+          .style("opacity", 1);
+           // set legend:
+          legend.selectAll("rect")
+            .style("class","white");
+  
+          d3.select(this).select("rect")
+          .style("fill",function(d) { return d;});
+    }
+    });
+
+
+    legend.selectAll("text").remove();
+
+    legend.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function (d, i) {
+          let extent = color.invertExtent(d);
+          let t = "";
+          if (escala=='4'){
+            if (encDomIng)
+              t = "from " + format(extent[0]) + " to " + format(+extent[1]);
+            else
+              t = "de " + format(extent[0]) + " a " + format(+extent[1]);
+          }
+          else{
+            if (encDomIng)
+              t = "from " + format(extent[0]) + " less than " + format(+extent[1]);
+            else
+              t = "de " + format(extent[0]) + " a menos de  " + format(+extent[1]);
+          }
+          //extent will be a two-element array, format it however you want:
+          return t
+        });
+        let highlighted = "";
+    }
+    else{ 
+      $('#'+id).empty();
+      
+      let lg= d3.select('#'+id)
+      .selectAll("g")
+      .data(color.range())
+      .enter()
+      .append("g")
+      .attr("transform", function (d, i) { return "translate(0," + i * 25 + ")"; })
+      .on("click", function (d, i) {
+        // clicking an active entry: reset
+        if (highlighted == d) {
+          g.style("opacity", 1);
+
+          lg.selectAll("rect")
+            .style("class", function (d) { return d; });
+
+          highlighted = ""; // rest
+        }
+        else {
+          highlighted = d;
+
+          g.style("opacity", 0.2)
+            .filter(function (f) {
+              let p;
+              if(bceros){
+                if (arrayColores[f.properties.estrator] == d)
+                p = true;
+                return p
+              }
+              else{
+                if (arrayColores[f.properties.estrator-1] == d)
+                p = true;
+                return p
+              }
+            })
+            .style("opacity", 1);
+
+
+          // set legend:
+          lg.selectAll("rect")
+            .style("class", "white");
+
+          d3.select(this).select("rect")
+            .style("fill", function (d) { return d; });
+        }
+
+      });
+  
+
+      lg.append("rect")
+    .attr("width", 18)
+    .attr("height", 15)
+    .style("fill", function (d) {
+      return d;
+    })
+    .style("cursor", "pointer");
+    
+    lg.append("text")
+    .attr("x", 24)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .text(function (d, i) {
+      let t = "";
+        if (i == 0) {
+          if (encDomIng)
+            t = "from " + format(dataEstrad3[i].limInferior) + " to " + format(dataEstrad3[i].limSuperior);
+          else
+            t = "de " + format(dataEstrad3[i].limInferior) + " a " + format(dataEstrad3[i].limSuperior);
+        }
+        else {
+          if (encDomIng)
+            t = "more than " + format(dataEstrad3[i].limInferior) + " to " + format(dataEstrad3[i].limSuperior);
+          else
+            t = "más de " + format(dataEstrad3[i].limInferior) + " a " + format(dataEstrad3[i].limSuperior);
+        }
+      return t
+    });
+
+     let highlighted = "";
+     legend=lg;
+    }
+  } catch (error) {
+    console.log("updateLegend"+error);
+  }
+
+};
+
+const coloresReales=(id,colores,dataEstratos) => {
+  let paletSelect=document.getElementById(id).getAttribute('data-colorchange');
+  if(paletSelect!=null){
+      switch (paletSelect) {
+        case "1":
+          colores=paleta1;
+        break;
+        case "2":
+          colores=paleta2;
+        break;
+        case "3":
+          colores=paleta3;
+        break;
+        case "4":
+          colores=paleta4;
+        break;
+      }
+      if(colores.length!=dataEstratos.length){
+        let resta=colores.length-dataEstratos.length;
+        colores=colores.slice(0,colores.length-resta);
+      }
+      
+  }
+  return colores;
+};
+
+const addOptions = (idselect, array)  =>{
+  let select = document.getElementById(idselect);
+  $.each(array, function(array, t) {
+          let option = document.createElement("option");
+          option.text = t[0];
+          option.value = t[0]
+          select.add(option);
+  });
+};
+
+const conections = (objP,objH) => {
+let long1,lat1,long2,lat2;
+long1=coordPaises[objP.nombre][0];
+lat1=coordPaises[objP.nombre][1];
+long2=coordPaises[objH.nombre][0];
+lat2=coordPaises[objH.nombre][1];
+// Create data: coordinates of start and end
+let link = {type: "LineString", coordinates: [[long1, lat1], [long2, lat2]]};
+   svgM
+   .append("path")
+   .attr("class", "connections")
+    .attr("d", pathM(link))
+    .style("fill", "none")
+    .style("stroke", "#00008b")
+    .style("stroke-width", 2);
+
+
+};
+
+const circle = (svgCircles,porcentaje,obj,ciX) => {
+  svgCircles
+  .append('circle')
+  .attr('cx', ciX)
+  .attr('cy', '50%')
+  .attr('r', 45)
+  .style("fill","white")
+  .attr("stroke", obj.color)
+  .attr("stroke-width", 6);
+
+  if(Math.sign(porcentaje)===-1){
+      svgCircles.append("text")
+      .style("fill","red")
+      .attr("dx", ciX)
+      .attr("dy", '50%') 
+      .attr("text-anchor", 'middle')
+      .attr("font-weight", '700')
+      .attr("font-size", '22px')
+      .text(porcentaje+"%");
+  }
+  else{
+      svgCircles.append("text")
+      .attr("dx", ciX)
+      .attr("dy", '50%') 
+      .attr("text-anchor", 'middle')
+      .attr("font-weight", '700')
+      .attr("font-size", '22px')
+      .text(porcentaje+"%");
+
+  }
+
+  svgCircles.append("text")
+        .attr("dx", ciX)
+        .attr("dy", '65%') 
+        .attr("text-anchor", 'middle')
+        .attr("font-size", '14px')
+        .text(obj.valor);
+  svgCircles.append("text")
+        .attr("dx", ciX)
+        .attr("dy", '95%') 
+        .attr("text-anchor", 'middle')
+        .attr("font-size", '14px')
+        .text(obj.nombre);
+};
+
+const calculosPorc = (vpc, vpb) => {
+  let porcentaje;
+  porcentaje = 100*(vpc/vpb-1);
+  return Math.round(porcentaje) ;
+};
+
